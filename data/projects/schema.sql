@@ -1,525 +1,1232 @@
--- =============================================================================
--- steward/data/projects/schema.sql
--- =============================================================================
--- Project Tracker schema — tables, triggers, indexes, and views.
 --
--- Run via the Makefile:
---   make schema     — load into existing database
---   make init       — full from-scratch setup (drop, create, schema, seed)
+-- PostgreSQL database dump
 --
--- Or manually:
---   psql -h <host> -U steward -d projects -f schema.sql
+
+\restrict wkVr2xKLxB0hVhd9R15JCzfpiTE1hOQPdMMLYhHb9UgHcTMaktCmPPKeooYn9OC
+
+-- Dumped from database version 15.16 (Debian 15.16-0+deb12u1)
+-- Dumped by pg_dump version 15.16 (Debian 15.16-0+deb12u1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
 --
--- Prerequisites:
---   The projects database must already exist with UTF8 encoding.
---   Run create_db.sql first if starting from scratch.
--- =============================================================================
+-- Name: set_updated_at(); Type: FUNCTION; Schema: public; Owner: steward
+--
 
--- =============================================================================
--- Project Tracker Schema
--- =============================================================================
--- Conventions:
---   - All tables use BIGINT GENERATED ALWAYS AS IDENTITY primary keys
---   - All FK columns are BIGINT to match
---   - created_at / updated_at on every mutable table
---   - updated_at maintained automatically by trigger
---   - Categorical values use lookup tables with BIGINT foreign keys
---   - slug columns are the stable human-readable handle for external references
---   - Lookup table names are singular (task_status, project_type, etc.)
--- =============================================================================
-
-
--- -----------------------------------------------------------------------------
--- Tear down in dependency order
--- Views first, then junction tables, then tables with FKs, then lookup tables
--- -----------------------------------------------------------------------------
-
-DROP VIEW  IF EXISTS v_task_tree       CASCADE;
-DROP VIEW  IF EXISTS v_tasks           CASCADE;
-DROP VIEW  IF EXISTS v_project_tree    CASCADE;
-DROP VIEW  IF EXISTS v_projects        CASCADE;
-
-DROP TABLE IF EXISTS project_contacts  CASCADE;
-DROP TABLE IF EXISTS contact_phones    CASCADE;
-DROP TABLE IF EXISTS contact_urls      CASCADE;
-DROP TABLE IF EXISTS contacts          CASCADE;
-DROP TABLE IF EXISTS project_files     CASCADE;
-DROP TABLE IF EXISTS task_tags         CASCADE;
-DROP TABLE IF EXISTS project_tags      CASCADE;
-DROP TABLE IF EXISTS tags              CASCADE;
-DROP TABLE IF EXISTS tasks             CASCADE;
-DROP TABLE IF EXISTS projects          CASCADE;
-
-DROP TABLE IF EXISTS priority          CASCADE;
-DROP TABLE IF EXISTS file_type         CASCADE;
-DROP TABLE IF EXISTS location_type     CASCADE;
-DROP TABLE IF EXISTS tag_category      CASCADE;
-DROP TABLE IF EXISTS project_type      CASCADE;
-DROP TABLE IF EXISTS project_status    CASCADE;
-DROP TABLE IF EXISTS task_status       CASCADE;
-
-DROP FUNCTION IF EXISTS set_updated_at CASCADE;
-
-
--- -----------------------------------------------------------------------------
--- Trigger function — keeps updated_at current on any UPDATE
--- -----------------------------------------------------------------------------
-
-CREATE OR REPLACE FUNCTION set_updated_at()
-RETURNS TRIGGER AS $$
+CREATE FUNCTION public.set_updated_at() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 
--- =============================================================================
--- LOOKUP TABLES
--- Small, stable, human-readable reference data.
--- sort_order controls display sequence in menus and reports.
--- =============================================================================
+ALTER FUNCTION public.set_updated_at() OWNER TO steward;
 
+SET default_tablespace = '';
 
--- -----------------------------------------------------------------------------
--- task_status
--- Matches todo.py VALID_STATUSES exactly. The name column is what the
--- application reads and writes — no translation layer needed.
--- -----------------------------------------------------------------------------
+SET default_table_access_method = heap;
 
-CREATE TABLE task_status (
-    id          BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name        VARCHAR(50)  NOT NULL UNIQUE,
-    display     VARCHAR(10)  NOT NULL,        -- CLI marker: [ ] [~] [!] [x]
-    sort_order  INT          NOT NULL DEFAULT 0,
-    is_terminal BOOLEAN      NOT NULL DEFAULT FALSE  -- TRUE = no further updates expected
-);
-
-
--- -----------------------------------------------------------------------------
--- project_status
--- -----------------------------------------------------------------------------
-
-CREATE TABLE project_status (
-    id         BIGINT      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name       VARCHAR(50) NOT NULL UNIQUE,
-    sort_order INT         NOT NULL DEFAULT 0
-);
-
-
--- -----------------------------------------------------------------------------
--- project_type
--- -----------------------------------------------------------------------------
-
-CREATE TABLE project_type (
-    id         BIGINT      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name       VARCHAR(50) NOT NULL UNIQUE,
-    sort_order INT         NOT NULL DEFAULT 0
-);
-
-
--- -----------------------------------------------------------------------------
--- tag_category
--- Groups tags by kind: component, technology, area, skill, etc.
--- -----------------------------------------------------------------------------
-
-CREATE TABLE tag_category (
-    id         BIGINT      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name       VARCHAR(50) NOT NULL UNIQUE,
-    sort_order INT         NOT NULL DEFAULT 0
-);
-
-
--- -----------------------------------------------------------------------------
--- location_type
--- Classifies file/path references in project_files.
--- -----------------------------------------------------------------------------
-
-CREATE TABLE location_type (
-    id         BIGINT      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name       VARCHAR(50) NOT NULL UNIQUE,   -- local, url, git, s3
-    sort_order INT         NOT NULL DEFAULT 0
-);
-
-
--- -----------------------------------------------------------------------------
--- file_type
--- Classifies the content kind of a project_files entry.
--- -----------------------------------------------------------------------------
-
-CREATE TABLE file_type (
-    id         BIGINT      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name       VARCHAR(50) NOT NULL UNIQUE,   -- markdown, config, log, script, etc.
-    sort_order INT         NOT NULL DEFAULT 0
-);
-
-
--- -----------------------------------------------------------------------------
--- priority
--- Task priority levels.
--- -----------------------------------------------------------------------------
-
-CREATE TABLE priority (
-    id         BIGINT      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name       VARCHAR(50) NOT NULL UNIQUE,   -- low, normal, high, blocking
-    sort_order INT         NOT NULL DEFAULT 0
-);
-
-
--- =============================================================================
--- CORE TABLES
--- =============================================================================
-
-
--- -----------------------------------------------------------------------------
--- projects
--- Self-referencing for unlimited subproject depth.
--- parent_id NULL = top-level project.
--- -----------------------------------------------------------------------------
-
-CREATE TABLE projects (
-    id          BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    parent_id   BIGINT       REFERENCES projects(id) ON DELETE SET NULL,
-    name        VARCHAR(255) NOT NULL,
-    slug        VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT,
-    status_id   BIGINT       NOT NULL REFERENCES project_status(id),
-    type_id     BIGINT       REFERENCES project_type(id),
-    target_date DATE,
-    created_at  TIMESTAMP    NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMP    NOT NULL DEFAULT NOW()
-);
-
-CREATE TRIGGER trg_projects_updated_at
-    BEFORE UPDATE ON projects
-    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
-CREATE INDEX idx_projects_parent ON projects(parent_id);
-CREATE INDEX idx_projects_status ON projects(status_id);
-CREATE INDEX idx_projects_type   ON projects(type_id);
-
-
--- -----------------------------------------------------------------------------
--- tasks
--- Self-referencing for unlimited subtask depth.
--- parent_id NULL = top-level task (must belong to a project directly).
--- Subtasks inherit project_id from parent — application enforces this on
--- insert; project_id is stored on every row for query simplicity.
--- links is comma-separated text, matching todo.py storage format.
--- source_file records which markdown/json file the task originated from.
 --
--- Deletion rules:
---   parent_id ON DELETE NO ACTION — application must detect children,
---   present double confirmation, then delete children before parent.
---   project_id ON DELETE CASCADE — if a project is deleted, all its
---   tasks (and their subtasks, via cascade) go with it.
--- -----------------------------------------------------------------------------
+-- Name: contact_phones; Type: TABLE; Schema: public; Owner: steward
+--
 
-CREATE TABLE tasks (
-    id           BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    project_id   BIGINT       NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    parent_id    BIGINT       REFERENCES tasks(id) ON DELETE NO ACTION,
-    description  TEXT         NOT NULL,
-    status_id    BIGINT       NOT NULL REFERENCES task_status(id),
-    priority_id  BIGINT       NOT NULL REFERENCES priority(id),
-    links        TEXT         NOT NULL DEFAULT '',
-    source_file  VARCHAR(255) NOT NULL DEFAULT '',
-    sort_order   INT          NOT NULL DEFAULT 0,
-    created_at   TIMESTAMP    NOT NULL DEFAULT NOW(),
-    updated_at   TIMESTAMP    NOT NULL DEFAULT NOW(),
-    completed_at TIMESTAMP
-);
-
-CREATE TRIGGER trg_tasks_updated_at
-    BEFORE UPDATE ON tasks
-    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
-CREATE INDEX idx_tasks_project  ON tasks(project_id);
-CREATE INDEX idx_tasks_parent   ON tasks(parent_id);
-CREATE INDEX idx_tasks_status   ON tasks(status_id);
-CREATE INDEX idx_tasks_priority ON tasks(priority_id);
-
-
--- -----------------------------------------------------------------------------
--- tags
--- -----------------------------------------------------------------------------
-
-CREATE TABLE tags (
-    id          BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name        VARCHAR(100) NOT NULL UNIQUE,
-    category_id BIGINT       REFERENCES tag_category(id)
-);
-
-CREATE INDEX idx_tags_category ON tags(category_id);
-
-
--- -----------------------------------------------------------------------------
--- project_tags  (many-to-many)
--- -----------------------------------------------------------------------------
-
-CREATE TABLE project_tags (
-    id         BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    project_id BIGINT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    tag_id     BIGINT NOT NULL REFERENCES tags(id)     ON DELETE CASCADE,
-    CONSTRAINT uq_project_tags UNIQUE (project_id, tag_id)
+CREATE TABLE public.contact_phones (
+    id bigint NOT NULL,
+    contact_id bigint NOT NULL,
+    phone_number character varying(50) NOT NULL,
+    description character varying(100),
+    created_at timestamp without time zone DEFAULT now() NOT NULL
 );
 
 
--- -----------------------------------------------------------------------------
--- task_tags  (many-to-many)
--- -----------------------------------------------------------------------------
+ALTER TABLE public.contact_phones OWNER TO steward;
 
-CREATE TABLE task_tags (
-    id      BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    task_id BIGINT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
-    tag_id  BIGINT NOT NULL REFERENCES tags(id)  ON DELETE CASCADE,
-    CONSTRAINT uq_task_tags UNIQUE (task_id, tag_id)
+--
+-- Name: contact_phones_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.contact_phones ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.contact_phones_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
 
--- -----------------------------------------------------------------------------
--- project_files
--- Attaches file paths or URLs to a project or task.
--- Either project_id or task_id must be set (enforced by CHECK).
--- -----------------------------------------------------------------------------
+--
+-- Name: contact_urls; Type: TABLE; Schema: public; Owner: steward
+--
 
-CREATE TABLE project_files (
-    id               BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    project_id       BIGINT       REFERENCES projects(id) ON DELETE CASCADE,
-    task_id          BIGINT       REFERENCES tasks(id)    ON DELETE CASCADE,
-    label            VARCHAR(255) NOT NULL,
-    file_type_id     BIGINT       NOT NULL REFERENCES file_type(id),
-    location         TEXT         NOT NULL,
-    location_type_id BIGINT       NOT NULL REFERENCES location_type(id),
-    notes            TEXT,
-    created_at       TIMESTAMP    NOT NULL DEFAULT NOW(),
-    CHECK (project_id IS NOT NULL OR task_id IS NOT NULL)
+CREATE TABLE public.contact_urls (
+    id bigint NOT NULL,
+    contact_id bigint NOT NULL,
+    url_type character varying(50),
+    url text NOT NULL,
+    created_at timestamp without time zone DEFAULT now() NOT NULL
 );
 
-CREATE INDEX idx_project_files_project ON project_files(project_id);
-CREATE INDEX idx_project_files_task    ON project_files(task_id);
 
+ALTER TABLE public.contact_urls OWNER TO steward;
 
--- -----------------------------------------------------------------------------
--- contacts
--- People associated with projects — hiring managers, clients, team members.
--- The relationship to a project and their role is in project_contacts.
--- -----------------------------------------------------------------------------
+--
+-- Name: contact_urls_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
 
-CREATE TABLE contacts (
-    id         BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name       VARCHAR(255) NOT NULL,
-    email      VARCHAR(255),
-    title      VARCHAR(100),
-    notes      TEXT,
-    created_at TIMESTAMP    NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP    NOT NULL DEFAULT NOW()
+ALTER TABLE public.contact_urls ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.contact_urls_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
-CREATE TRIGGER trg_contacts_updated_at
-    BEFORE UPDATE ON contacts
-    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+--
+-- Name: contacts; Type: TABLE; Schema: public; Owner: steward
+--
 
--- -----------------------------------------------------------------------------
--- contact_phones
--- A contact can have multiple phone numbers.
--- -----------------------------------------------------------------------------
-
-CREATE TABLE contact_phones (
-    id           BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    contact_id   BIGINT       NOT NULL REFERENCES contacts(id) ON DELETE CASCADE,
-    phone_number VARCHAR(50)  NOT NULL,
-    description  VARCHAR(100),
-    created_at   TIMESTAMP    NOT NULL DEFAULT NOW()
+CREATE TABLE public.contacts (
+    id bigint NOT NULL,
+    name character varying(255) NOT NULL,
+    email character varying(255),
+    title character varying(100),
+    notes text,
+    created_at timestamp without time zone DEFAULT now() NOT NULL,
+    updated_at timestamp without time zone DEFAULT now() NOT NULL
 );
 
-CREATE INDEX idx_contact_phones_contact ON contact_phones(contact_id);
 
+ALTER TABLE public.contacts OWNER TO steward;
 
--- -----------------------------------------------------------------------------
--- contact_urls
--- A contact can have multiple URLs (LinkedIn, GitHub, portfolio, etc.)
--- -----------------------------------------------------------------------------
+--
+-- Name: contacts_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
 
-CREATE TABLE contact_urls (
-    id         BIGINT      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    contact_id BIGINT      NOT NULL REFERENCES contacts(id) ON DELETE CASCADE,
-    url_type   VARCHAR(50),
-    url        TEXT        NOT NULL,
-    created_at TIMESTAMP   NOT NULL DEFAULT NOW()
+ALTER TABLE public.contacts ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.contacts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
-CREATE INDEX idx_contact_urls_contact ON contact_urls(contact_id);
 
+--
+-- Name: file_type; Type: TABLE; Schema: public; Owner: steward
+--
 
--- -----------------------------------------------------------------------------
--- project_contacts  (many-to-many with payload)
--- Links contacts to projects. role and is_primary describe the relationship,
--- not the contact — a person can have different roles on different projects.
--- -----------------------------------------------------------------------------
-
-CREATE TABLE project_contacts (
-    id         BIGINT       GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    project_id BIGINT       NOT NULL REFERENCES projects(id)  ON DELETE CASCADE,
-    contact_id BIGINT       NOT NULL REFERENCES contacts(id)  ON DELETE CASCADE,
-    role       VARCHAR(100),
-    is_primary BOOLEAN      NOT NULL DEFAULT FALSE,
-    CONSTRAINT uq_project_contacts UNIQUE (project_id, contact_id)
+CREATE TABLE public.file_type (
+    id bigint NOT NULL,
+    name character varying(50) NOT NULL,
+    sort_order integer DEFAULT 0 NOT NULL
 );
 
-CREATE INDEX idx_project_contacts_project ON project_contacts(project_id);
-CREATE INDEX idx_project_contacts_contact ON project_contacts(contact_id);
+
+ALTER TABLE public.file_type OWNER TO steward;
+
+--
+-- Name: file_type_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.file_type ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.file_type_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
 
 
--- =============================================================================
--- VIEWS
--- =============================================================================
+--
+-- Name: location_type; Type: TABLE; Schema: public; Owner: steward
+--
+
+CREATE TABLE public.location_type (
+    id bigint NOT NULL,
+    name character varying(50) NOT NULL,
+    sort_order integer DEFAULT 0 NOT NULL
+);
 
 
--- -----------------------------------------------------------------------------
--- v_tasks
--- Joins lookup names back in so application queries don't need to.
--- Includes parent_id and parent description for subtask context.
--- -----------------------------------------------------------------------------
+ALTER TABLE public.location_type OWNER TO steward;
 
-CREATE VIEW v_tasks AS
+--
+-- Name: location_type_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.location_type ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.location_type_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: priority; Type: TABLE; Schema: public; Owner: steward
+--
+
+CREATE TABLE public.priority (
+    id bigint NOT NULL,
+    name character varying(50) NOT NULL,
+    sort_order integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public.priority OWNER TO steward;
+
+--
+-- Name: priority_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.priority ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.priority_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: project_contacts; Type: TABLE; Schema: public; Owner: steward
+--
+
+CREATE TABLE public.project_contacts (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    contact_id bigint NOT NULL,
+    role character varying(100),
+    is_primary boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE public.project_contacts OWNER TO steward;
+
+--
+-- Name: project_contacts_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.project_contacts ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.project_contacts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: project_files; Type: TABLE; Schema: public; Owner: steward
+--
+
+CREATE TABLE public.project_files (
+    id bigint NOT NULL,
+    project_id bigint,
+    task_id bigint,
+    label character varying(255) NOT NULL,
+    file_type_id bigint NOT NULL,
+    location text NOT NULL,
+    location_type_id bigint NOT NULL,
+    notes text,
+    created_at timestamp without time zone DEFAULT now() NOT NULL,
+    CONSTRAINT project_files_check CHECK (((project_id IS NOT NULL) OR (task_id IS NOT NULL)))
+);
+
+
+ALTER TABLE public.project_files OWNER TO steward;
+
+--
+-- Name: project_files_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.project_files ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.project_files_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: project_status; Type: TABLE; Schema: public; Owner: steward
+--
+
+CREATE TABLE public.project_status (
+    id bigint NOT NULL,
+    name character varying(50) NOT NULL,
+    sort_order integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public.project_status OWNER TO steward;
+
+--
+-- Name: project_status_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.project_status ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.project_status_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: project_tags; Type: TABLE; Schema: public; Owner: steward
+--
+
+CREATE TABLE public.project_tags (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    tag_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.project_tags OWNER TO steward;
+
+--
+-- Name: project_tags_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.project_tags ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.project_tags_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: project_type; Type: TABLE; Schema: public; Owner: steward
+--
+
+CREATE TABLE public.project_type (
+    id bigint NOT NULL,
+    name character varying(50) NOT NULL,
+    sort_order integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public.project_type OWNER TO steward;
+
+--
+-- Name: project_type_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.project_type ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.project_type_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: projects; Type: TABLE; Schema: public; Owner: steward
+--
+
+CREATE TABLE public.projects (
+    id bigint NOT NULL,
+    parent_id bigint,
+    name character varying(255) NOT NULL,
+    slug character varying(100) NOT NULL,
+    description text,
+    status_id bigint NOT NULL,
+    type_id bigint,
+    target_date date,
+    created_at timestamp without time zone DEFAULT now() NOT NULL,
+    updated_at timestamp without time zone DEFAULT now() NOT NULL,
+    notes text
+);
+
+
+ALTER TABLE public.projects OWNER TO steward;
+
+--
+-- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.projects ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.projects_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: tag_category; Type: TABLE; Schema: public; Owner: steward
+--
+
+CREATE TABLE public.tag_category (
+    id bigint NOT NULL,
+    name character varying(50) NOT NULL,
+    sort_order integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public.tag_category OWNER TO steward;
+
+--
+-- Name: tag_category_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.tag_category ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.tag_category_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: tags; Type: TABLE; Schema: public; Owner: steward
+--
+
+CREATE TABLE public.tags (
+    id bigint NOT NULL,
+    name character varying(100) NOT NULL,
+    category_id bigint
+);
+
+
+ALTER TABLE public.tags OWNER TO steward;
+
+--
+-- Name: tags_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.tags ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.tags_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: task_status; Type: TABLE; Schema: public; Owner: steward
+--
+
+CREATE TABLE public.task_status (
+    id bigint NOT NULL,
+    name character varying(50) NOT NULL,
+    display character varying(10) NOT NULL,
+    sort_order integer DEFAULT 0 NOT NULL,
+    is_terminal boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE public.task_status OWNER TO steward;
+
+--
+-- Name: task_status_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.task_status ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.task_status_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: task_tags; Type: TABLE; Schema: public; Owner: steward
+--
+
+CREATE TABLE public.task_tags (
+    id bigint NOT NULL,
+    task_id bigint NOT NULL,
+    tag_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.task_tags OWNER TO steward;
+
+--
+-- Name: task_tags_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.task_tags ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.task_tags_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: tasks; Type: TABLE; Schema: public; Owner: steward
+--
+
+CREATE TABLE public.tasks (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    parent_id bigint,
+    description text NOT NULL,
+    status_id bigint NOT NULL,
+    priority_id bigint NOT NULL,
+    links text DEFAULT ''::text NOT NULL,
+    source_file character varying(255) DEFAULT ''::character varying NOT NULL,
+    sort_order integer DEFAULT 0 NOT NULL,
+    created_at timestamp without time zone DEFAULT now() NOT NULL,
+    updated_at timestamp without time zone DEFAULT now() NOT NULL,
+    completed_at timestamp without time zone,
+    notes text
+);
+
+
+ALTER TABLE public.tasks OWNER TO steward;
+
+--
+-- Name: tasks_id_seq; Type: SEQUENCE; Schema: public; Owner: steward
+--
+
+ALTER TABLE public.tasks ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.tasks_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: v_project_tree; Type: VIEW; Schema: public; Owner: steward
+--
+
+CREATE VIEW public.v_project_tree AS
+ WITH RECURSIVE tree AS (
+         SELECT projects.id,
+            projects.parent_id,
+            projects.name,
+            projects.slug,
+            0 AS depth,
+            ARRAY[(projects.slug)::character varying] AS path
+           FROM public.projects
+          WHERE (projects.parent_id IS NULL)
+        UNION ALL
+         SELECT p.id,
+            p.parent_id,
+            p.name,
+            p.slug,
+            (t.depth + 1),
+            (t.path || p.slug)
+           FROM (public.projects p
+             JOIN tree t ON ((t.id = p.parent_id)))
+        )
+ SELECT tree.id,
+    tree.parent_id,
+    tree.name,
+    tree.slug,
+    tree.depth,
+    tree.path
+   FROM tree;
+
+
+ALTER TABLE public.v_project_tree OWNER TO steward;
+
+--
+-- Name: v_projects; Type: VIEW; Schema: public; Owner: steward
+--
+
+CREATE VIEW public.v_projects AS
 SELECT
-    t.id,
+    NULL::bigint AS id,
+    NULL::bigint AS parent_id,
+    NULL::character varying(255) AS parent_name,
+    NULL::character varying(100) AS parent_slug,
+    NULL::character varying(255) AS name,
+    NULL::character varying(100) AS slug,
+    NULL::text AS description,
+    NULL::text AS notes,
+    NULL::character varying(50) AS status,
+    NULL::character varying(50) AS project_type,
+    NULL::date AS target_date,
+    NULL::timestamp without time zone AS created_at,
+    NULL::timestamp without time zone AS updated_at,
+    NULL::bigint AS total_tasks,
+    NULL::bigint AS completed_tasks,
+    NULL::bigint AS open_tasks;
+
+
+ALTER TABLE public.v_projects OWNER TO steward;
+
+--
+-- Name: v_task_tree; Type: VIEW; Schema: public; Owner: steward
+--
+
+CREATE VIEW public.v_task_tree AS
+ WITH RECURSIVE tree AS (
+         SELECT t.id,
+            t.parent_id,
+            t.project_id,
+            p.slug AS project_slug,
+            t.description,
+            ts.name AS status,
+            ts.is_terminal,
+            pr.name AS priority,
+            t.sort_order,
+            0 AS depth,
+            ARRAY[t.id] AS path
+           FROM (((public.tasks t
+             JOIN public.projects p ON ((p.id = t.project_id)))
+             JOIN public.task_status ts ON ((ts.id = t.status_id)))
+             JOIN public.priority pr ON ((pr.id = t.priority_id)))
+          WHERE (t.parent_id IS NULL)
+        UNION ALL
+         SELECT t.id,
+            t.parent_id,
+            t.project_id,
+            p.slug AS project_slug,
+            t.description,
+            ts.name AS status,
+            ts.is_terminal,
+            pr.name AS priority,
+            t.sort_order,
+            (tree_1.depth + 1),
+            (tree_1.path || t.id)
+           FROM ((((public.tasks t
+             JOIN public.projects p ON ((p.id = t.project_id)))
+             JOIN public.task_status ts ON ((ts.id = t.status_id)))
+             JOIN public.priority pr ON ((pr.id = t.priority_id)))
+             JOIN tree tree_1 ON ((tree_1.id = t.parent_id)))
+        )
+ SELECT tree.id,
+    tree.parent_id,
+    tree.project_id,
+    tree.project_slug,
+    tree.description,
+    tree.status,
+    tree.is_terminal,
+    tree.priority,
+    tree.sort_order,
+    tree.depth,
+    tree.path
+   FROM tree;
+
+
+ALTER TABLE public.v_task_tree OWNER TO steward;
+
+--
+-- Name: v_tasks; Type: VIEW; Schema: public; Owner: steward
+--
+
+CREATE VIEW public.v_tasks AS
+ SELECT t.id,
     t.project_id,
-    p.name          AS project_name,
-    p.slug          AS project_slug,
+    p.name AS project_name,
+    p.slug AS project_slug,
     t.parent_id,
-    pt.description  AS parent_description,
+    pt.description AS parent_description,
     t.description,
-    ts.name         AS status,
-    ts.display      AS status_display,
+    t.notes,
+    ts.name AS status,
+    ts.display AS status_display,
     ts.is_terminal,
-    pr.name         AS priority,
+    pr.name AS priority,
     t.links,
     t.source_file,
     t.sort_order,
     t.created_at,
     t.updated_at,
     t.completed_at
-FROM      tasks        t
-JOIN      projects     p  ON p.id  = t.project_id
-JOIN      task_status  ts ON ts.id = t.status_id
-JOIN      priority     pr ON pr.id = t.priority_id
-LEFT JOIN tasks        pt ON pt.id = t.parent_id;
+   FROM ((((public.tasks t
+     JOIN public.projects p ON ((p.id = t.project_id)))
+     JOIN public.task_status ts ON ((ts.id = t.status_id)))
+     JOIN public.priority pr ON ((pr.id = t.priority_id)))
+     LEFT JOIN public.tasks pt ON ((pt.id = t.parent_id)));
 
 
--- -----------------------------------------------------------------------------
--- v_projects
--- Flat view with all lookup names resolved and task counts included.
--- Task counts reflect direct project tasks only (not subtasks).
--- -----------------------------------------------------------------------------
+ALTER TABLE public.v_tasks OWNER TO steward;
 
-CREATE VIEW v_projects AS
-SELECT
-    p.id,
+--
+-- Name: contact_phones contact_phones_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.contact_phones
+    ADD CONSTRAINT contact_phones_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: contact_urls contact_urls_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.contact_urls
+    ADD CONSTRAINT contact_urls_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: contacts contacts_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.contacts
+    ADD CONSTRAINT contacts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: file_type file_type_name_key; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.file_type
+    ADD CONSTRAINT file_type_name_key UNIQUE (name);
+
+
+--
+-- Name: file_type file_type_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.file_type
+    ADD CONSTRAINT file_type_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: location_type location_type_name_key; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.location_type
+    ADD CONSTRAINT location_type_name_key UNIQUE (name);
+
+
+--
+-- Name: location_type location_type_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.location_type
+    ADD CONSTRAINT location_type_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: priority priority_name_key; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.priority
+    ADD CONSTRAINT priority_name_key UNIQUE (name);
+
+
+--
+-- Name: priority priority_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.priority
+    ADD CONSTRAINT priority_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: project_contacts project_contacts_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_contacts
+    ADD CONSTRAINT project_contacts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: project_files project_files_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_files
+    ADD CONSTRAINT project_files_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: project_status project_status_name_key; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_status
+    ADD CONSTRAINT project_status_name_key UNIQUE (name);
+
+
+--
+-- Name: project_status project_status_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_status
+    ADD CONSTRAINT project_status_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: project_tags project_tags_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_tags
+    ADD CONSTRAINT project_tags_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: project_type project_type_name_key; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_type
+    ADD CONSTRAINT project_type_name_key UNIQUE (name);
+
+
+--
+-- Name: project_type project_type_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_type
+    ADD CONSTRAINT project_type_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: projects projects_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: projects projects_slug_key; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_slug_key UNIQUE (slug);
+
+
+--
+-- Name: tag_category tag_category_name_key; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.tag_category
+    ADD CONSTRAINT tag_category_name_key UNIQUE (name);
+
+
+--
+-- Name: tag_category tag_category_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.tag_category
+    ADD CONSTRAINT tag_category_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: tags tags_name_key; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.tags
+    ADD CONSTRAINT tags_name_key UNIQUE (name);
+
+
+--
+-- Name: tags tags_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.tags
+    ADD CONSTRAINT tags_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: task_status task_status_name_key; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.task_status
+    ADD CONSTRAINT task_status_name_key UNIQUE (name);
+
+
+--
+-- Name: task_status task_status_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.task_status
+    ADD CONSTRAINT task_status_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: task_tags task_tags_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.task_tags
+    ADD CONSTRAINT task_tags_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: tasks tasks_pkey; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.tasks
+    ADD CONSTRAINT tasks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: project_contacts uq_project_contacts; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_contacts
+    ADD CONSTRAINT uq_project_contacts UNIQUE (project_id, contact_id);
+
+
+--
+-- Name: project_tags uq_project_tags; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_tags
+    ADD CONSTRAINT uq_project_tags UNIQUE (project_id, tag_id);
+
+
+--
+-- Name: task_tags uq_task_tags; Type: CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.task_tags
+    ADD CONSTRAINT uq_task_tags UNIQUE (task_id, tag_id);
+
+
+--
+-- Name: idx_contact_phones_contact; Type: INDEX; Schema: public; Owner: steward
+--
+
+CREATE INDEX idx_contact_phones_contact ON public.contact_phones USING btree (contact_id);
+
+
+--
+-- Name: idx_contact_urls_contact; Type: INDEX; Schema: public; Owner: steward
+--
+
+CREATE INDEX idx_contact_urls_contact ON public.contact_urls USING btree (contact_id);
+
+
+--
+-- Name: idx_project_contacts_contact; Type: INDEX; Schema: public; Owner: steward
+--
+
+CREATE INDEX idx_project_contacts_contact ON public.project_contacts USING btree (contact_id);
+
+
+--
+-- Name: idx_project_contacts_project; Type: INDEX; Schema: public; Owner: steward
+--
+
+CREATE INDEX idx_project_contacts_project ON public.project_contacts USING btree (project_id);
+
+
+--
+-- Name: idx_project_files_project; Type: INDEX; Schema: public; Owner: steward
+--
+
+CREATE INDEX idx_project_files_project ON public.project_files USING btree (project_id);
+
+
+--
+-- Name: idx_project_files_task; Type: INDEX; Schema: public; Owner: steward
+--
+
+CREATE INDEX idx_project_files_task ON public.project_files USING btree (task_id);
+
+
+--
+-- Name: idx_projects_parent; Type: INDEX; Schema: public; Owner: steward
+--
+
+CREATE INDEX idx_projects_parent ON public.projects USING btree (parent_id);
+
+
+--
+-- Name: idx_projects_status; Type: INDEX; Schema: public; Owner: steward
+--
+
+CREATE INDEX idx_projects_status ON public.projects USING btree (status_id);
+
+
+--
+-- Name: idx_projects_type; Type: INDEX; Schema: public; Owner: steward
+--
+
+CREATE INDEX idx_projects_type ON public.projects USING btree (type_id);
+
+
+--
+-- Name: idx_tags_category; Type: INDEX; Schema: public; Owner: steward
+--
+
+CREATE INDEX idx_tags_category ON public.tags USING btree (category_id);
+
+
+--
+-- Name: idx_tasks_parent; Type: INDEX; Schema: public; Owner: steward
+--
+
+CREATE INDEX idx_tasks_parent ON public.tasks USING btree (parent_id);
+
+
+--
+-- Name: idx_tasks_priority; Type: INDEX; Schema: public; Owner: steward
+--
+
+CREATE INDEX idx_tasks_priority ON public.tasks USING btree (priority_id);
+
+
+--
+-- Name: idx_tasks_project; Type: INDEX; Schema: public; Owner: steward
+--
+
+CREATE INDEX idx_tasks_project ON public.tasks USING btree (project_id);
+
+
+--
+-- Name: idx_tasks_status; Type: INDEX; Schema: public; Owner: steward
+--
+
+CREATE INDEX idx_tasks_status ON public.tasks USING btree (status_id);
+
+
+--
+-- Name: v_projects _RETURN; Type: RULE; Schema: public; Owner: steward
+--
+
+CREATE OR REPLACE VIEW public.v_projects AS
+ SELECT p.id,
     p.parent_id,
-    parent.name     AS parent_name,
-    parent.slug     AS parent_slug,
+    parent.name AS parent_name,
+    parent.slug AS parent_slug,
     p.name,
     p.slug,
     p.description,
-    ps.name         AS status,
-    pt.name         AS project_type,
+    p.notes,
+    ps.name AS status,
+    pt.name AS project_type,
     p.target_date,
     p.created_at,
     p.updated_at,
-    COUNT(t.id)                                          AS total_tasks,
-    COUNT(t.id) FILTER (WHERE ts.is_terminal = TRUE)     AS completed_tasks,
-    COUNT(t.id) FILTER (WHERE ts.is_terminal = FALSE)    AS open_tasks
-FROM           projects       p
-JOIN           project_status ps     ON ps.id     = p.status_id
-LEFT JOIN      project_type   pt     ON pt.id     = p.type_id
-LEFT JOIN      projects       parent ON parent.id = p.parent_id
-LEFT JOIN      tasks          t      ON t.project_id = p.id
-LEFT JOIN      task_status    ts     ON ts.id     = t.status_id
-GROUP BY p.id, parent.name, parent.slug, ps.name, pt.name;
+    count(t.id) AS total_tasks,
+    count(t.id) FILTER (WHERE (ts.is_terminal = true)) AS completed_tasks,
+    count(t.id) FILTER (WHERE (ts.is_terminal = false)) AS open_tasks
+   FROM (((((public.projects p
+     JOIN public.project_status ps ON ((ps.id = p.status_id)))
+     LEFT JOIN public.project_type pt ON ((pt.id = p.type_id)))
+     LEFT JOIN public.projects parent ON ((parent.id = p.parent_id)))
+     LEFT JOIN public.tasks t ON ((t.project_id = p.id)))
+     LEFT JOIN public.task_status ts ON ((ts.id = t.status_id)))
+  GROUP BY p.id, parent.name, parent.slug, ps.name, pt.name;
 
 
--- -----------------------------------------------------------------------------
--- v_project_tree
--- Recursive view — expands full ancestry for any project.
--- depth 0 = top-level project.
--- -----------------------------------------------------------------------------
+--
+-- Name: contacts trg_contacts_updated_at; Type: TRIGGER; Schema: public; Owner: steward
+--
 
-CREATE VIEW v_project_tree AS
-WITH RECURSIVE tree AS (
-    SELECT
-        id,
-        parent_id,
-        name,
-        slug,
-        0               AS depth,
-        ARRAY[slug]::VARCHAR[] AS path
-    FROM projects
-    WHERE parent_id IS NULL
-
-    UNION ALL
-
-    SELECT
-        p.id,
-        p.parent_id,
-        p.name,
-        p.slug,
-        t.depth + 1,
-        t.path || p.slug
-    FROM  projects p
-    JOIN  tree     t ON t.id = p.parent_id
-)
-SELECT * FROM tree;
+CREATE TRIGGER trg_contacts_updated_at BEFORE UPDATE ON public.contacts FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
--- -----------------------------------------------------------------------------
--- v_task_tree
--- Recursive view — expands full subtask ancestry for any task.
--- depth 0 = top-level task (parent_id IS NULL).
--- path shows the chain of task IDs from root to current node.
--- project_id and project_slug carried through for filtering by project.
--- -----------------------------------------------------------------------------
+--
+-- Name: projects trg_projects_updated_at; Type: TRIGGER; Schema: public; Owner: steward
+--
 
-CREATE VIEW v_task_tree AS
-WITH RECURSIVE tree AS (
-    SELECT
-        t.id,
-        t.parent_id,
-        t.project_id,
-        p.slug          AS project_slug,
-        t.description,
-        ts.name         AS status,
-        ts.is_terminal,
-        pr.name         AS priority,
-        t.sort_order,
-        0               AS depth,
-        ARRAY[t.id]     AS path
-    FROM      tasks       t
-    JOIN      projects    p  ON p.id  = t.project_id
-    JOIN      task_status ts ON ts.id = t.status_id
-    JOIN      priority    pr ON pr.id = t.priority_id
-    WHERE t.parent_id IS NULL
+CREATE TRIGGER trg_projects_updated_at BEFORE UPDATE ON public.projects FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
-    UNION ALL
 
-    SELECT
-        t.id,
-        t.parent_id,
-        t.project_id,
-        p.slug          AS project_slug,
-        t.description,
-        ts.name         AS status,
-        ts.is_terminal,
-        pr.name         AS priority,
-        t.sort_order,
-        tree.depth + 1,
-        tree.path || t.id
-    FROM      tasks       t
-    JOIN      projects    p  ON p.id  = t.project_id
-    JOIN      task_status ts ON ts.id = t.status_id
-    JOIN      priority    pr ON pr.id = t.priority_id
-    JOIN      tree            ON tree.id = t.parent_id
-)
-SELECT * FROM tree;
+--
+-- Name: tasks trg_tasks_updated_at; Type: TRIGGER; Schema: public; Owner: steward
+--
+
+CREATE TRIGGER trg_tasks_updated_at BEFORE UPDATE ON public.tasks FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
+-- Name: contact_phones contact_phones_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.contact_phones
+    ADD CONSTRAINT contact_phones_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES public.contacts(id) ON DELETE CASCADE;
+
+
+--
+-- Name: contact_urls contact_urls_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.contact_urls
+    ADD CONSTRAINT contact_urls_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES public.contacts(id) ON DELETE CASCADE;
+
+
+--
+-- Name: project_contacts project_contacts_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_contacts
+    ADD CONSTRAINT project_contacts_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES public.contacts(id) ON DELETE CASCADE;
+
+
+--
+-- Name: project_contacts project_contacts_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_contacts
+    ADD CONSTRAINT project_contacts_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: project_files project_files_file_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_files
+    ADD CONSTRAINT project_files_file_type_id_fkey FOREIGN KEY (file_type_id) REFERENCES public.file_type(id);
+
+
+--
+-- Name: project_files project_files_location_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_files
+    ADD CONSTRAINT project_files_location_type_id_fkey FOREIGN KEY (location_type_id) REFERENCES public.location_type(id);
+
+
+--
+-- Name: project_files project_files_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_files
+    ADD CONSTRAINT project_files_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: project_files project_files_task_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_files
+    ADD CONSTRAINT project_files_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(id) ON DELETE CASCADE;
+
+
+--
+-- Name: project_tags project_tags_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_tags
+    ADD CONSTRAINT project_tags_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: project_tags project_tags_tag_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.project_tags
+    ADD CONSTRAINT project_tags_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id) ON DELETE CASCADE;
+
+
+--
+-- Name: projects projects_parent_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES public.projects(id) ON DELETE SET NULL;
+
+
+--
+-- Name: projects projects_status_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_status_id_fkey FOREIGN KEY (status_id) REFERENCES public.project_status(id);
+
+
+--
+-- Name: projects projects_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_type_id_fkey FOREIGN KEY (type_id) REFERENCES public.project_type(id);
+
+
+--
+-- Name: tags tags_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.tags
+    ADD CONSTRAINT tags_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.tag_category(id);
+
+
+--
+-- Name: task_tags task_tags_tag_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.task_tags
+    ADD CONSTRAINT task_tags_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id) ON DELETE CASCADE;
+
+
+--
+-- Name: task_tags task_tags_task_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.task_tags
+    ADD CONSTRAINT task_tags_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(id) ON DELETE CASCADE;
+
+
+--
+-- Name: tasks tasks_parent_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.tasks
+    ADD CONSTRAINT tasks_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES public.tasks(id);
+
+
+--
+-- Name: tasks tasks_priority_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.tasks
+    ADD CONSTRAINT tasks_priority_id_fkey FOREIGN KEY (priority_id) REFERENCES public.priority(id);
+
+
+--
+-- Name: tasks tasks_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.tasks
+    ADD CONSTRAINT tasks_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: tasks tasks_status_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: steward
+--
+
+ALTER TABLE ONLY public.tasks
+    ADD CONSTRAINT tasks_status_id_fkey FOREIGN KEY (status_id) REFERENCES public.task_status(id);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
+\unrestrict wkVr2xKLxB0hVhd9R15JCzfpiTE1hOQPdMMLYhHb9UgHcTMaktCmPPKeooYn9OC
+
