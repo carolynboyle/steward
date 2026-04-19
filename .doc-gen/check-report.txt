@@ -1,0 +1,110 @@
+======================================================================
+CHECK MODE - Dry Run Report
+======================================================================
+
+Manifest:     /home/carolyn/projects/steward/.doc-gen/manifest.yml
+Project Root: /home/carolyn/projects/steward
+Output Dir:   /home/carolyn/projects/steward/.doc-gen/output
+Total Files:  22
+
+======================================================================
+Files that would be generated:
+======================================================================
+
+✓ EXISTS
+  Source: .gitignore
+  Output: output/.gitignore.md
+
+✓ EXISTS
+  Source: archive/schema1.sql
+  Output: output/archive/schema1.sql.md
+
+✓ EXISTS
+  Source: data/projects/Makefile
+  Output: output/data/projects/Makefile.md
+
+✓ EXISTS
+  Source: data/projects/README.md
+  Output: output/data/projects/README.md.md
+
+✓ EXISTS
+  Source: data/projects/__init__.py
+  Output: output/data/projects/__init__.py.md
+
+✓ EXISTS
+  Source: data/projects/config.yaml
+  Output: output/data/projects/config.yaml.md
+
+✓ EXISTS
+  Source: data/projects/create_db.sql
+  Output: output/data/projects/create_db.sql.md
+
+✓ EXISTS
+  Source: data/projects/schema.sql
+  Output: output/data/projects/schema.sql.md
+
+✓ EXISTS
+  Source: data/projects/seed.sql
+  Output: output/data/projects/seed.sql.md
+
+✓ EXISTS
+  Source: data/schema.sql
+  Output: output/data/schema.sql.md
+
+✓ EXISTS
+  Source: data/seed.sql
+  Output: output/data/seed.sql.md
+
+✓ EXISTS
+  Source: directus/README.md
+  Output: output/directus/README.md.md
+
+✓ EXISTS
+  Source: directus/docker-compose.yml
+  Output: output/directus/docker-compose.yml.md
+
+✓ EXISTS
+  Source: directus/env.template
+  Output: output/directus/env.template.md
+
+✓ EXISTS
+  Source: directus/gitignore
+  Output: output/directus/gitignore.md
+
+✓ EXISTS
+  Source: pyproject.toml
+  Output: output/pyproject.toml.md
+
+✓ EXISTS
+  Source: steward.egg-info/PKG-INFO
+  Output: output/steward.egg-info/PKG-INFO.md
+
+✓ EXISTS
+  Source: steward.egg-info/SOURCES.txt
+  Output: output/steward.egg-info/SOURCES.txt.md
+
+✓ EXISTS
+  Source: steward.egg-info/dependency_links.txt
+  Output: output/steward.egg-info/dependency_links.txt.md
+
+✓ EXISTS
+  Source: steward.egg-info/requires.txt
+  Output: output/steward.egg-info/requires.txt.md
+
+✓ EXISTS
+  Source: steward.egg-info/top_level.txt
+  Output: output/steward.egg-info/top_level.txt.md
+
+✓ EXISTS
+  Source: templates/config.yaml.template
+  Output: output/templates/config.yaml.template.md
+
+======================================================================
+Summary:
+======================================================================
+Total files in manifest: 22
+Source files exist:      22
+Source files missing:    0
+
+No files were written (dry-run mode)
+======================================================================

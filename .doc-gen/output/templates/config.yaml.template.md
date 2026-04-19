@@ -1,0 +1,32 @@
+# config.yaml.template
+
+**Path:** templates/config.yaml.template
+**Syntax:** text
+**Generated:** 2026-04-19 15:48:51
+
+```
+# steward/data/projects/config.yaml.template
+#
+# Copy this file to config.yaml and fill in the values.
+# config.yaml is gitignored and should never be committed.
+#
+# host:          IP or hostname of the machine running postgres
+# port:          postgres port (usually 5432)
+# dbname:        name of the database to manage
+# owner:         postgres user that owns the database
+# encoding:      database encoding (UTF8 recommended)
+# locale:        locale for collation (C.UTF-8 is safe across all Linux installs)
+# ssh_password:  password for ssh login to host as your OS user
+# sudo_password: sudo password on host (often the same as ssh_password)
+# db_password:   password for the owner postgres user
+
+host:          
+port:          5432
+dbname:        
+owner:         
+encoding:      UTF8
+locale:        C.UTF-8
+ssh_password:  
+sudo_password: 
+db_password:
+```

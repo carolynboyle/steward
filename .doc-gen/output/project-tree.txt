@@ -1,0 +1,125 @@
+./
+├── archive/
+│   └── schema1.sql
+├── data/
+│   ├── projects/
+│   │   ├── config.yaml
+│   │   ├── create_db.sql
+│   │   ├── __init__.py
+│   │   ├── Makefile
+│   │   ├── README.md
+│   │   ├── schema.sql
+│   │   └── seed.sql
+│   ├── schema.sql
+│   └── seed.sql
+├── directus/
+│   ├── docker-compose.yml
+│   ├── env.template
+│   ├── gitignore
+│   └── README.md
+├── .doc-gen/
+│   ├── backups/
+│   ├── defaults.yml
+│   ├── ignore-patterns.txt
+│   ├── manifest.yml
+│   └── output/
+├── .git/
+│   ├── branches/
+│   ├── COMMIT_EDITMSG
+│   ├── config
+│   ├── description
+│   ├── HEAD
+│   ├── hooks/
+│   │   ├── applypatch-msg.sample*
+│   │   ├── commit-msg.sample*
+│   │   ├── fsmonitor-watchman.sample*
+│   │   ├── post-update.sample*
+│   │   ├── pre-applypatch.sample*
+│   │   ├── pre-commit.sample*
+│   │   ├── pre-merge-commit.sample*
+│   │   ├── prepare-commit-msg.sample*
+│   │   ├── pre-push.sample*
+│   │   ├── pre-rebase.sample*
+│   │   ├── pre-receive.sample*
+│   │   ├── push-to-checkout.sample*
+│   │   └── update.sample*
+│   ├── index
+│   ├── info/
+│   │   └── exclude
+│   ├── logs/
+│   │   ├── HEAD
+│   │   └── refs/
+│   │       ├── heads/
+│   │       │   └── master
+│   │       └── remotes/
+│   │           └── origin/
+│   │               └── master
+│   ├── objects/
+│   │   ├── 07/
+│   │   │   └── 52fb9f7084686c81aef1231cc7cd95fbf23ca7
+│   │   ├── 1a/
+│   │   │   └── 6fa41ed43de0fc21c299af21867e0aac34d499
+│   │   ├── 2c/
+│   │   │   └── 9351e243645f59f617ab5b4fb36addb0423a94
+│   │   ├── 32/
+│   │   │   └── c3e159a6ca13277011f7944005dc2cce64e473
+│   │   ├── 3d/
+│   │   │   └── f744d9cc9f277a4821a341186d66ef5ed0fd86
+│   │   ├── 47/
+│   │   │   └── 8da36beb459e9dfbd10e0abf7cdd71b58b8b4f
+│   │   ├── 4b/
+│   │   │   └── 402cd47084c1d1307e94021a7afa75424ca6bc
+│   │   ├── 5d/
+│   │   │   └── 69eb48089d4f336bc8fc4a8e253aee84014458
+│   │   ├── 67/
+│   │   │   └── 3d8517f1268fad59a83c05a15c2fc3d55ff43b
+│   │   ├── 70/
+│   │   │   └── 5e4c7aa441cf3c37f9132ace69cfeb477c1fab
+│   │   ├── 7a/
+│   │   │   └── 8daf83770d08fb4c76fd7f31065a2630e4dbcb
+│   │   ├── 88/
+│   │   │   └── 85482b6d29d02bb1c06ac10262151c9198f777
+│   │   ├── 90/
+│   │   │   └── 8a911f6f3d8f9a7584eb405f0a6058f52c984f
+│   │   ├── 93/
+│   │   │   └── 922ba641252be6129aac59b149bc356999f044
+│   │   ├── 96/
+│   │   │   └── d1ff5a4467703dcc7648ea148f183aa57f9845
+│   │   ├── b0/
+│   │   │   └── 2920821837e21c077798a146050fbeb2e89fd2
+│   │   ├── b1/
+│   │   │   └── e18eccc59b60f122c20b25e189a51f750f67d5
+│   │   ├── b9/
+│   │   │   └── 9ded4aa90b01108b3ca79716f3611715920e7d
+│   │   ├── bb/
+│   │   │   └── 663330015dae1b7055732fc1104ba87d510bee
+│   │   ├── be/
+│   │   │   └── be696f46110063a3c70750c6d59069e9ad2b56
+│   │   ├── d1/
+│   │   │   └── c5999966d4956812cd94bfaebd7f39632fced5
+│   │   ├── e1/
+│   │   │   ├── adf1ad526d27b577ca2af8135b788d7d30e5e4
+│   │   │   └── c20becd39f370748d2d3c1b24e29a4e0c968ad
+│   │   ├── ef/
+│   │   │   └── d62e4e2042606be104933ea44d9b0e66bf5bb7
+│   │   ├── info/
+│   │   └── pack/
+│   └── refs/
+│       ├── heads/
+│       │   └── master
+│       ├── remotes/
+│       │   └── origin/
+│       │       └── master
+│       └── tags/
+├── .gitignore
+├── pyproject.toml
+├── steward.egg-info/
+│   ├── dependency_links.txt
+│   ├── PKG-INFO
+│   ├── requires.txt
+│   ├── SOURCES.txt
+│   └── top_level.txt
+└── templates/
+    └── config.yaml.template
+
+50 directories, 73 files

@@ -1,0 +1,27 @@
+# env.template
+
+**Path:** directus/env.template
+**Syntax:** text
+**Generated:** 2026-04-19 15:48:51
+
+```
+# =============================================================================
+# Directus secrets -- DO NOT COMMIT THIS FILE
+# =============================================================================
+#
+# Generate fresh values on the target host:
+#   SECRET:         openssl rand -base64 32
+#   ADMIN_PASSWORD: openssl rand -base64 16
+#
+# Permissions: chmod 600 .env
+#
+# If SECRET changes, all existing user sessions are invalidated (users must
+# log in again). ADMIN_PASSWORD only takes effect on first bootstrap -- to
+# change it afterwards, use the Directus UI or CLI.
+#
+# =============================================================================
+
+DIRECTUS_SECRET=replace-with-openssl-rand-base64-32
+DIRECTUS_ADMIN_PASSWORD=replace-with-openssl-rand-base64-16
+
+```

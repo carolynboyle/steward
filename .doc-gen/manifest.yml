@@ -1,0 +1,28 @@
+# Generated: 2026-04-19 15:48:12
+# Project: /home/carolyn/projects/steward
+# Files: 22
+
+version: 1
+documents:
+- path: .gitignore
+- path: archive/schema1.sql
+- path: data/projects/Makefile
+- path: data/projects/README.md
+- path: data/projects/__init__.py
+- path: data/projects/config.yaml
+- path: data/projects/create_db.sql
+- path: data/projects/schema.sql
+- path: data/projects/seed.sql
+- path: data/schema.sql
+- path: data/seed.sql
+- path: directus/README.md
+- path: directus/docker-compose.yml
+- path: directus/env.template
+- path: directus/gitignore
+- path: pyproject.toml
+- path: steward.egg-info/PKG-INFO
+- path: steward.egg-info/SOURCES.txt
+- path: steward.egg-info/dependency_links.txt
+- path: steward.egg-info/requires.txt
+- path: steward.egg-info/top_level.txt
+- path: templates/config.yaml.template
