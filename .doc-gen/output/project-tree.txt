@@ -2,16 +2,14 @@
 ├── archive/
 │   └── schema1.sql
 ├── data/
-│   ├── projects/
-│   │   ├── config.yaml
-│   │   ├── create_db.sql
-│   │   ├── __init__.py
-│   │   ├── Makefile
-│   │   ├── README.md
-│   │   ├── schema.sql
-│   │   └── seed.sql
-│   ├── schema.sql
-│   └── seed.sql
+│   └── projects/
+│       ├── config.yaml
+│       ├── create_db.sql
+│       ├── __init__.py
+│       ├── Makefile
+│       ├── README.md
+│       ├── schema.sql
+│       └── seed.sql
 ├── directus/
 │   ├── docker-compose.yml
 │   ├── env.template
@@ -19,10 +17,43 @@
 │   └── README.md
 ├── .doc-gen/
 │   ├── backups/
+│   ├── check-report.txt
 │   ├── defaults.yml
 │   ├── ignore-patterns.txt
+│   ├── manifest-backups/
+│   │   └── 20260419-154812-manifest.yml
+│   ├── manifest.fletch
 │   ├── manifest.yml
 │   └── output/
+│       ├── archive/
+│       │   └── schema1.sql.md
+│       ├── data/
+│       │   ├── projects/
+│       │   │   ├── config.yaml.md
+│       │   │   ├── create_db.sql.md
+│       │   │   ├── __init__.py.md
+│       │   │   ├── Makefile.md
+│       │   │   ├── README.md.md
+│       │   │   ├── schema.sql.md
+│       │   │   └── seed.sql.md
+│       │   ├── schema.sql.md
+│       │   └── seed.sql.md
+│       ├── directus/
+│       │   ├── docker-compose.yml.md
+│       │   ├── env.template.md
+│       │   ├── gitignore.md
+│       │   └── README.md.md
+│       ├── .gitignore.md
+│       ├── project-tree.txt
+│       ├── pyproject.toml.md
+│       ├── steward.egg-info/
+│       │   ├── dependency_links.txt.md
+│       │   ├── PKG-INFO.md
+│       │   ├── requires.txt.md
+│       │   ├── SOURCES.txt.md
+│       │   └── top_level.txt.md
+│       └── templates/
+│           └── config.yaml.template.md
 ├── .git/
 │   ├── branches/
 │   ├── COMMIT_EDITMSG
@@ -50,43 +81,94 @@
 │   │   ├── HEAD
 │   │   └── refs/
 │   │       ├── heads/
-│   │       │   └── master
+│   │       │   └── main
 │   │       └── remotes/
 │   │           └── origin/
-│   │               └── master
+│   │               └── main
 │   ├── objects/
+│   │   ├── 05/
+│   │   │   └── bc17e850faa218006bbd562a14a68bee2b1983
+│   │   ├── 06/
+│   │   │   └── 3b82883575bc3ce3ee9183ce9bd54fb3feda17
 │   │   ├── 07/
 │   │   │   └── 52fb9f7084686c81aef1231cc7cd95fbf23ca7
+│   │   ├── 0d/
+│   │   │   ├── c74d9ededa6b67a5473c05c20f641e43cda0ef
+│   │   │   └── f794fbbc090461b4a4390c7da280aa8af201d9
 │   │   ├── 1a/
+│   │   │   ├── 598d01fbf12d730dc1b96c778f5a1e17c10ef3
 │   │   │   └── 6fa41ed43de0fc21c299af21867e0aac34d499
+│   │   ├── 1b/
+│   │   │   └── 6e067f04bbc4c525c5d295b67ed02646e77160
+│   │   ├── 1d/
+│   │   │   └── 7b290eb70814d8aa2dc5f0b0960c5fa9524078
+│   │   ├── 28/
+│   │   │   └── 4efca6ca0b4ea1dda5e34d2284233f057196d6
+│   │   ├── 29/
+│   │   │   └── 6653379065d6cd90fb0718dcb523e6d8bfb874
 │   │   ├── 2c/
 │   │   │   └── 9351e243645f59f617ab5b4fb36addb0423a94
+│   │   ├── 2e/
+│   │   │   └── f971e4a37a300a9bf3681919141f85475de4ab
 │   │   ├── 32/
+│   │   │   ├── a27eef7d93cc005e687fc58967505872325bce
 │   │   │   └── c3e159a6ca13277011f7944005dc2cce64e473
 │   │   ├── 3d/
 │   │   │   └── f744d9cc9f277a4821a341186d66ef5ed0fd86
+│   │   ├── 3f/
+│   │   │   └── aaca538ebbf08cc6e6d28f410d0166ada060b3
+│   │   ├── 41/
+│   │   │   └── 6707b25c959d7d695344c4c7774204909cf6fa
+│   │   ├── 44/
+│   │   │   └── 75861f31266af86807c21035ff05ac4d279ccf
 │   │   ├── 47/
 │   │   │   └── 8da36beb459e9dfbd10e0abf7cdd71b58b8b4f
 │   │   ├── 4b/
 │   │   │   └── 402cd47084c1d1307e94021a7afa75424ca6bc
 │   │   ├── 5d/
-│   │   │   └── 69eb48089d4f336bc8fc4a8e253aee84014458
+│   │   │   ├── 69eb48089d4f336bc8fc4a8e253aee84014458
+│   │   │   └── ee0a20f17695ed3b4ea7349cf97650f9e1f32e
+│   │   ├── 5f/
+│   │   │   └── d15fb0bf9ff0ee1f7f1b7f83a88515cd1ef269
 │   │   ├── 67/
 │   │   │   └── 3d8517f1268fad59a83c05a15c2fc3d55ff43b
+│   │   ├── 69/
+│   │   │   └── a63484abaef36dcf33a3e0b9f2cabb0f40afb4
 │   │   ├── 70/
 │   │   │   └── 5e4c7aa441cf3c37f9132ace69cfeb477c1fab
 │   │   ├── 7a/
 │   │   │   └── 8daf83770d08fb4c76fd7f31065a2630e4dbcb
+│   │   ├── 7f/
+│   │   │   └── 5242d423f3f335270d595b69d54c9aec3d112b
+│   │   ├── 80/
+│   │   │   └── e2ff4417b9b56a1cd6eb0e081ef6e67122bd04
 │   │   ├── 88/
 │   │   │   └── 85482b6d29d02bb1c06ac10262151c9198f777
+│   │   ├── 89/
+│   │   │   └── f6fc0aff99797fde304d07964313015b98101a
+│   │   ├── 8e/
+│   │   │   └── f82f63db05ad9b174127c86b8386b927de770e
 │   │   ├── 90/
-│   │   │   └── 8a911f6f3d8f9a7584eb405f0a6058f52c984f
+│   │   │   ├── 10ba1db6b3fb6411580de6e8ccb7a774e72f9b
+│   │   │   └── b30612fb8faf3f6851f2a2f45e2d6a7b98ec8e
 │   │   ├── 93/
 │   │   │   └── 922ba641252be6129aac59b149bc356999f044
 │   │   ├── 96/
 │   │   │   └── d1ff5a4467703dcc7648ea148f183aa57f9845
-│   │   ├── b0/
-│   │   │   └── 2920821837e21c077798a146050fbeb2e89fd2
+│   │   ├── 97/
+│   │   │   └── 1c872ecae82cb109da3f4b35727e023c2329ac
+│   │   ├── 9b/
+│   │   │   └── 7264f18a04bae8dce92f94dd36577fe8e6696c
+│   │   ├── 9d/
+│   │   │   └── 37939b7d37890c97098f7f98224424ee9bd4ce
+│   │   ├── a1/
+│   │   │   └── 31666c6bd4012757231a77081858f99207800d
+│   │   ├── a2/
+│   │   │   └── eacf29c4dc0afce5c454456c699fa45110427a
+│   │   ├── a9/
+│   │   │   └── b81a2013d0ac3df38a9159c5acf4f8cac8d903
+│   │   ├── ab/
+│   │   │   └── f0c7142f09c24146fda962db969e7030e31341
 │   │   ├── b1/
 │   │   │   └── e18eccc59b60f122c20b25e189a51f750f67d5
 │   │   ├── b9/
@@ -97,19 +179,34 @@
 │   │   │   └── be696f46110063a3c70750c6d59069e9ad2b56
 │   │   ├── d1/
 │   │   │   └── c5999966d4956812cd94bfaebd7f39632fced5
+│   │   ├── d3/
+│   │   │   └── d44bd227512d47636acb533d25fe2c11777d78
+│   │   ├── d8/
+│   │   │   └── e4ccb9e8f64629929cc84f452e996978647695
+│   │   ├── df/
+│   │   │   └── 0d46e1f6a78dc910c8863673106d290765a665
 │   │   ├── e1/
 │   │   │   ├── adf1ad526d27b577ca2af8135b788d7d30e5e4
 │   │   │   └── c20becd39f370748d2d3c1b24e29a4e0c968ad
+│   │   ├── e2/
+│   │   │   ├── 9ac3d835894ba18218e39c38ee532717cffeb2
+│   │   │   └── ffc635e26f75e89a5978eb5ce176f1d6bb5207
+│   │   ├── ec/
+│   │   │   └── 2f343fb94c080d6cffe28eb90f2b34199337fb
 │   │   ├── ef/
 │   │   │   └── d62e4e2042606be104933ea44d9b0e66bf5bb7
+│   │   ├── f5/
+│   │   │   └── c5f4741663c79b2a3ff01dbd0bc5a818f85e34
+│   │   ├── f6/
+│   │   │   └── 3ee12d67a56c2c166502b438f079eaaf327aca
 │   │   ├── info/
 │   │   └── pack/
 │   └── refs/
 │       ├── heads/
-│       │   └── master
+│       │   └── main
 │       ├── remotes/
 │       │   └── origin/
-│       │       └── master
+│       │       └── main
 │       └── tags/
 ├── .gitignore
 ├── pyproject.toml
@@ -122,4 +219,4 @@
 └── templates/
     └── config.yaml.template
 
-50 directories, 73 files
+87 directories, 133 files

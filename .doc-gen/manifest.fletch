@@ -1,57 +1,57 @@
-# Generated: 2026-04-19 15:49:08
+# Generated: 2026-04-19 16:03:17
 # Repo: https://github.com/carolynboyle/steward
-# Branch: master
+# Branch: main
 # URL type: raw
 # Version: v0.1.0
 # Files: 22
 
 repo: https://github.com/carolynboyle/steward
-branch: master
+branch: main
 url_type: raw
-generated: '2026-04-19 15:49:08'
+generated: '2026-04-19 16:03:17'
 version: 0.1.0
 files:
 - path: .gitignore
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/.gitignore
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/.gitignore
 - path: archive/schema1.sql
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/archive/schema1.sql
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/archive/schema1.sql
 - path: data/projects/Makefile
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/data/projects/Makefile
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/data/projects/Makefile
 - path: data/projects/README.md
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/data/projects/README.md
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/data/projects/README.md
 - path: data/projects/__init__.py
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/data/projects/__init__.py
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/data/projects/__init__.py
 - path: data/projects/config.yaml
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/data/projects/config.yaml
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/data/projects/config.yaml
 - path: data/projects/create_db.sql
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/data/projects/create_db.sql
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/data/projects/create_db.sql
 - path: data/projects/schema.sql
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/data/projects/schema.sql
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/data/projects/schema.sql
 - path: data/projects/seed.sql
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/data/projects/seed.sql
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/data/projects/seed.sql
 - path: data/schema.sql
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/data/schema.sql
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/data/schema.sql
 - path: data/seed.sql
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/data/seed.sql
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/data/seed.sql
 - path: directus/README.md
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/directus/README.md
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/directus/README.md
 - path: directus/docker-compose.yml
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/directus/docker-compose.yml
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/directus/docker-compose.yml
 - path: directus/env.template
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/directus/env.template
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/directus/env.template
 - path: directus/gitignore
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/directus/gitignore
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/directus/gitignore
 - path: pyproject.toml
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/pyproject.toml
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/pyproject.toml
 - path: steward.egg-info/PKG-INFO
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/steward.egg-info/PKG-INFO
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/steward.egg-info/PKG-INFO
 - path: steward.egg-info/SOURCES.txt
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/steward.egg-info/SOURCES.txt
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/steward.egg-info/SOURCES.txt
 - path: steward.egg-info/dependency_links.txt
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/steward.egg-info/dependency_links.txt
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/steward.egg-info/dependency_links.txt
 - path: steward.egg-info/requires.txt
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/steward.egg-info/requires.txt
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/steward.egg-info/requires.txt
 - path: steward.egg-info/top_level.txt
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/steward.egg-info/top_level.txt
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/steward.egg-info/top_level.txt
 - path: templates/config.yaml.template
-  url: https://raw.githubusercontent.com/carolynboyle/steward/master/templates/config.yaml.template
+  url: https://raw.githubusercontent.com/carolynboyle/steward/main/templates/config.yaml.template
