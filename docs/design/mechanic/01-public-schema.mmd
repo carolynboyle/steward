@@ -1,0 +1,77 @@
+erDiagram
+
+    %% ─── PUBLIC SCHEMA ───────────────────────────────────────────────────────
+    %% Cross-references:
+    %% organizations → see 02-mechanic-core.mmd (owns nodes)
+    %% contacts      → see 02-mechanic-core.mmd, 03-people-and-auth.mmd, 04-sessions-and-keys.mmd
+    %% projects      → see 02-mechanic-core.mmd (produced device)
+
+    organizations {
+        bigint id PK
+        varchar name
+        timestamp created_at
+    }
+
+    contacts {
+        bigint id PK
+        varchar name
+        varchar title
+        text notes
+        bigint organization_id FK "nullable ON DELETE SET NULL"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    contact_emails {
+        bigint id PK
+        bigint contact_id FK "ON DELETE CASCADE"
+        varchar email
+        varchar email_type
+    }
+
+    contact_phones {
+        bigint id PK
+        bigint contact_id FK "ON DELETE CASCADE"
+        varchar phone_number
+        varchar description
+    }
+
+    contact_urls {
+        bigint id PK
+        bigint contact_id FK "ON DELETE CASCADE"
+        varchar url_type
+        text url
+    }
+
+    projects {
+        bigint id PK
+        bigint parent_id FK "nullable self-ref ON DELETE SET NULL"
+        varchar name
+        varchar slug
+        text description
+        bigint status_id FK
+        bigint type_id FK
+        date target_date
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    project_status {
+        bigint id PK
+        varchar name
+        integer sort_order
+    }
+
+    project_type {
+        bigint id PK
+        varchar name
+        integer sort_order
+    }
+
+    organizations ||--o{ contacts : "has"
+    contacts ||--o{ contact_emails : "has"
+    contacts ||--o{ contact_phones : "has"
+    contacts ||--o{ contact_urls : "has"
+    projects ||--o{ projects : "parent of"
+    project_status ||--o{ projects : "classifies"
+    project_type ||--o{ projects : "classifies"

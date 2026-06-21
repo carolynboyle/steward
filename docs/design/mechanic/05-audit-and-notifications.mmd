@@ -1,0 +1,79 @@
+erDiagram
+
+    %% ─── AUDIT AND NOTIFICATIONS ─────────────────────────────────────────────
+    %% Cross-references:
+    %% app_user → see 03-people-and-auth.mmd
+    %% device   → see 02-mechanic-core.mmd
+    %% node     → see 02-mechanic-core.mmd
+
+    app_user_ref {
+        bigint id PK
+        string "see 03-people-and-auth"
+    }
+
+    device_ref {
+        bigint id PK
+        string "see 02-mechanic-core"
+    }
+
+    node_ref {
+        bigint id PK
+        string "see 02-mechanic-core"
+    }
+
+    audit_severity {
+        bigint id PK
+        varchar name "info, warning, critical"
+        integer sort_order
+    }
+
+    audit_event_type {
+        bigint id PK
+        bigint severity_id FK
+        varchar name
+        boolean triggers_lockout
+        boolean triggers_notification
+        integer sort_order
+    }
+
+    audit_log {
+        bigint id PK
+        bigint event_type_id FK
+        bigint app_user_id FK "nullable - pre-auth events"
+        bigint device_id FK "nullable"
+        bigint node_id FK "nullable"
+        inet ip_address
+        jsonb detail
+        timestamp created_at
+        timestamp resolved_at
+        bigint resolved_by FK "app_user"
+    }
+
+    notification_channel {
+        bigint id PK
+        varchar name "signal, app, both"
+        integer sort_order
+    }
+
+    notification {
+        bigint id PK
+        bigint audit_log_id FK
+        bigint app_user_id FK
+        bigint device_id FK "nullable"
+        bigint channel_id FK
+        timestamp sent_at
+        timestamp acknowledged_at
+        bigint acknowledged_by FK "app_user"
+    }
+
+    audit_severity ||--o{ audit_event_type : "classifies"
+    audit_event_type ||--o{ audit_log : "classifies"
+    app_user_ref ||--o{ audit_log : "triggered by"
+    app_user_ref ||--o{ audit_log : "resolved by"
+    device_ref ||--o{ audit_log : "subject of"
+    node_ref ||--o{ audit_log : "subject of"
+    audit_log ||--o{ notification : "triggers"
+    app_user_ref ||--o{ notification : "receives"
+    app_user_ref ||--o{ notification : "acknowledged by"
+    device_ref ||--o{ notification : "delivered to"
+    notification_channel ||--o{ notification : "via"

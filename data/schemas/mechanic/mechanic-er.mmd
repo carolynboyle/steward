@@ -1,0 +1,273 @@
+erDiagram
+
+    %% ─── PUBLIC SCHEMA (existing) ───────────────────────────────────────────
+
+    organizations {
+        bigint id PK
+        varchar name
+        timestamp created_at
+    }
+
+    contacts {
+        bigint id PK
+        varchar name
+        varchar title
+        text notes
+        bigint organization_id FK "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    contact_emails {
+        bigint id PK
+        bigint contact_id FK
+        varchar email
+        varchar email_type
+    }
+
+    contact_phones {
+        bigint id PK
+        bigint contact_id FK
+        varchar phone_number
+        varchar description
+    }
+
+    projects {
+        bigint id PK
+        bigint parent_id FK
+        varchar name
+        varchar slug
+        text description
+        bigint status_id FK
+        bigint type_id FK
+        date target_date
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% ─── MECHANIC LOOKUP TABLES ─────────────────────────────────────────────
+
+    node_type {
+        bigint id PK
+        varchar name "yours, partner, customer"
+        integer sort_order
+    }
+
+    node_status {
+        bigint id PK
+        varchar name "active, suspended, decommissioned"
+        integer sort_order
+    }
+
+    device_condition {
+        bigint id PK
+        varchar name "new, good, fair, poor"
+        integer sort_order
+    }
+
+    device_status {
+        bigint id PK
+        varchar name "in_refurb, deployed, decommissioned"
+        integer sort_order
+    }
+
+    session_status {
+        bigint id PK
+        varchar name "requested, active, closed, expired"
+        integer sort_order
+    }
+
+    session_outcome {
+        bigint id PK
+        varchar name "resolved, unresolved, cancelled, no_show"
+        integer sort_order
+    }
+
+    key_expiry_type {
+        bigint id PK
+        varchar name "session, timed, permanent"
+        boolean customer_allowed
+        integer sort_order
+    }
+
+    app_role {
+        bigint id PK
+        varchar name "admin, technician, customer"
+        integer sort_order
+    }
+
+    notification_channel {
+        bigint id PK
+        varchar name "signal, app, both"
+        integer sort_order
+    }
+
+    audit_severity {
+        bigint id PK
+        varchar name "info, warning, critical"
+        integer sort_order
+    }
+
+    audit_event_type {
+        bigint id PK
+        varchar name
+        bigint severity_id FK
+        boolean triggers_lockout
+        boolean triggers_notification
+        integer sort_order
+    }
+
+    %% ─── MECHANIC CORE TABLES ────────────────────────────────────────────────
+
+    node {
+        bigint id PK
+        bigint organization_id FK "NOT NULL ON DELETE RESTRICT"
+        bigint node_type_id FK
+        bigint node_status_id FK
+        varchar name
+        varchar headscale_namespace
+        timestamp last_verified_at
+        text notes
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    device {
+        bigint id PK
+        bigint node_id FK "ON DELETE RESTRICT"
+        bigint project_id FK "nullable ON DELETE SET NULL"
+        bigint device_condition_id FK
+        bigint device_status_id FK
+        varchar hostname
+        varchar headscale_machine_id
+        varchar make
+        varchar model
+        varchar serial
+        varchar os_installed
+        varchar recovery_token_hash
+        timestamp last_verified_at
+        boolean is_active
+        timestamp decommissioned_at
+        text notes
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    app_user {
+        bigint id PK
+        bigint contact_id FK "NOT NULL"
+        bigint role_id FK "NOT NULL"
+        bigint created_by FK "NOT NULL self-ref"
+        varchar username
+        varchar password_hash
+        varchar totp_secret
+        boolean totp_enabled
+        timestamp totp_verified_at
+        boolean is_active
+        timestamp last_login
+        timestamp locked_at
+        integer failed_attempts
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    technician {
+        bigint id PK
+        bigint app_user_id FK "NOT NULL"
+        varchar handle
+        varchar gpg_key_fingerprint
+        boolean active
+        timestamp created_at
+    }
+
+    support_session {
+        bigint id PK
+        bigint device_id FK "ON DELETE RESTRICT"
+        bigint technician_id FK
+        bigint requested_by FK "contacts"
+        bigint session_status_id FK
+        bigint session_outcome_id FK "nullable"
+        varchar initiation_type
+        timestamp requested_at
+        timestamp started_at
+        timestamp ended_at
+        text notes
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    auth_key_event {
+        bigint id PK
+        bigint device_id FK
+        bigint technician_id FK "nullable"
+        bigint requested_by FK "app_user"
+        bigint key_expiry_type_id FK
+        timestamp issued_at
+        timestamp expires_at "nullable only if not timed"
+        timestamp revoked_at
+        text notes
+    }
+
+    audit_log {
+        bigint id PK
+        bigint event_type_id FK
+        bigint app_user_id FK "nullable pre-auth events"
+        bigint device_id FK "nullable"
+        bigint node_id FK "nullable"
+        inet ip_address
+        jsonb detail
+        timestamp created_at
+        timestamp resolved_at
+        bigint resolved_by FK "app_user"
+    }
+
+    notification {
+        bigint id PK
+        bigint audit_log_id FK
+        bigint app_user_id FK
+        bigint device_id FK "nullable"
+        bigint channel_id FK
+        timestamp sent_at
+        timestamp acknowledged_at
+        bigint acknowledged_by FK "app_user"
+    }
+
+    %% ─── PUBLIC SCHEMA RELATIONSHIPS ────────────────────────────────────────
+
+    organizations ||--o{ contacts : "has"
+    contacts ||--o{ contact_emails : "has"
+    contacts ||--o{ contact_phones : "has"
+
+    %% ─── LOOKUP RELATIONSHIPS ────────────────────────────────────────────────
+
+    node_type ||--o{ node : "classifies"
+    node_status ||--o{ node : "classifies"
+    device_condition ||--o{ device : "classifies"
+    device_status ||--o{ device : "classifies"
+    session_status ||--o{ support_session : "classifies"
+    session_outcome ||--o{ support_session : "classifies"
+    key_expiry_type ||--o{ auth_key_event : "classifies"
+    app_role ||--o{ app_user : "grants"
+    audit_severity ||--o{ audit_event_type : "classifies"
+    audit_event_type ||--o{ audit_log : "classifies"
+    notification_channel ||--o{ notification : "via"
+
+    %% ─── CROSS-SCHEMA RELATIONSHIPS ──────────────────────────────────────────
+
+    organizations ||--o{ node : "owns (NOT NULL, RESTRICT)"
+    contacts ||--o| app_user : "is"
+    contacts ||--o{ support_session : "requests"
+    projects ||--o| device : "produced (nullable, SET NULL)"
+
+    %% ─── MECHANIC CORE RELATIONSHIPS ────────────────────────────────────────
+
+    node ||--o{ device : "contains (RESTRICT)"
+    app_user ||--o{ app_user : "created_by"
+    app_user ||--o| technician : "is"
+    technician ||--o{ support_session : "conducts"
+    technician ||--o{ auth_key_event : "issues"
+    device ||--o{ support_session : "has (RESTRICT)"
+    device ||--o{ auth_key_event : "has"
+    app_user ||--o{ auth_key_event : "requested_by"
+    audit_log ||--o{ notification : "triggers"
+    app_user ||--o{ notification : "receives"
