@@ -1,0 +1,85 @@
+erDiagram
+
+    %% ─── MECHANIC CORE ───────────────────────────────────────────────────────
+    %% Cross-references:
+    %% organizations → see 01-public-schema.mmd
+    %% projects      → see 01-public-schema.mmd
+    %% app_user      → see 03-people-and-auth.mmd
+    %% support_session → see 04-sessions-and-keys.mmd
+    %% auth_key_event  → see 04-sessions-and-keys.mmd
+
+    organizations_ref {
+        bigint id PK
+        string "see 01-public-schema"
+    }
+
+    projects_ref {
+        bigint id PK
+        string "see 01-public-schema"
+    }
+
+    node_type {
+        bigint id PK
+        varchar name "yours, partner, customer"
+        integer sort_order
+    }
+
+    node_status {
+        bigint id PK
+        varchar name "active, suspended, decommissioned"
+        integer sort_order
+    }
+
+    device_condition {
+        bigint id PK
+        varchar name "new, good, fair, poor"
+        integer sort_order
+    }
+
+    device_status {
+        bigint id PK
+        varchar name "in_refurb, deployed, decommissioned"
+        integer sort_order
+    }
+
+    node {
+        bigint id PK
+        bigint organization_id FK "NOT NULL ON DELETE RESTRICT"
+        bigint node_type_id FK
+        bigint node_status_id FK
+        varchar name
+        varchar headscale_namespace
+        timestamp last_verified_at
+        text notes
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    device {
+        bigint id PK
+        bigint node_id FK "ON DELETE RESTRICT"
+        bigint project_id FK "nullable ON DELETE SET NULL"
+        bigint device_condition_id FK
+        bigint device_status_id FK
+        varchar hostname
+        varchar headscale_machine_id
+        varchar make
+        varchar model
+        varchar serial
+        varchar os_installed
+        varchar recovery_token_hash
+        timestamp last_verified_at
+        boolean is_active
+        timestamp decommissioned_at
+        text notes
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    organizations_ref ||--o{ node : "owns (NOT NULL, RESTRICT)"
+    node_type ||--o{ node : "classifies"
+    node_status ||--o{ node : "classifies"
+    node ||--o{ device : "contains (RESTRICT)"
+    device_condition ||--o{ device : "classifies"
+    device_status ||--o{ device : "classifies"
+    projects_ref ||--o| device : "produced (nullable, SET NULL)"

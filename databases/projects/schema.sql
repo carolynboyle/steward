@@ -628,13 +628,13 @@ ALTER TABLE public.tasks ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 --
 -- Name: v_project_tree; Type: VIEW; Schema: public; Owner: steward
 --
-
 CREATE VIEW public.v_project_tree AS
  WITH RECURSIVE tree AS (
          SELECT projects.id,
             projects.parent_id,
             projects.name,
             projects.slug,
+            projects.type_id,
             0 AS depth,
             ARRAY[(projects.slug)::character varying] AS path
            FROM public.projects
@@ -644,6 +644,7 @@ CREATE VIEW public.v_project_tree AS
             p.parent_id,
             p.name,
             p.slug,
+            p.type_id,
             (t.depth + 1),
             (t.path || p.slug)
            FROM (public.projects p
@@ -654,8 +655,10 @@ CREATE VIEW public.v_project_tree AS
     tree.name,
     tree.slug,
     tree.depth,
-    tree.path
-   FROM tree;
+    tree.path,
+    pt.name AS project_type
+   FROM tree
+   LEFT JOIN public.project_type pt ON (pt.id = tree.type_id);
 
 
 ALTER TABLE public.v_project_tree OWNER TO steward;

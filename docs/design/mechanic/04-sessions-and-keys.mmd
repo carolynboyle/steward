@@ -1,0 +1,86 @@
+erDiagram
+
+    %% ─── SESSIONS AND KEYS ───────────────────────────────────────────────────
+    %% Cross-references:
+    %% device      → see 02-mechanic-core.mmd
+    %% contacts    → see 01-public-schema.mmd
+    %% technician  → see 03-people-and-auth.mmd
+    %% app_user    → see 03-people-and-auth.mmd
+    %% audit_log   → see 05-audit-and-notifications.mmd
+
+    device_ref {
+        bigint id PK
+        string "see 02-mechanic-core"
+    }
+
+    contacts_ref {
+        bigint id PK
+        string "see 01-public-schema"
+    }
+
+    technician_ref {
+        bigint id PK
+        string "see 03-people-and-auth"
+    }
+
+    app_user_ref {
+        bigint id PK
+        string "see 03-people-and-auth"
+    }
+
+    session_status {
+        bigint id PK
+        varchar name "requested, active, closed, expired"
+        integer sort_order
+    }
+
+    session_outcome {
+        bigint id PK
+        varchar name "resolved, unresolved, cancelled, no_show"
+        integer sort_order
+    }
+
+    key_expiry_type {
+        bigint id PK
+        varchar name "session, timed, permanent"
+        boolean customer_allowed
+        integer sort_order
+    }
+
+    support_session {
+        bigint id PK
+        bigint device_id FK "ON DELETE RESTRICT"
+        bigint technician_id FK
+        bigint requested_by FK "contacts"
+        bigint session_status_id FK
+        bigint session_outcome_id FK "nullable"
+        varchar initiation_type
+        timestamp requested_at
+        timestamp started_at
+        timestamp ended_at
+        text notes
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    auth_key_event {
+        bigint id PK
+        bigint device_id FK
+        bigint technician_id FK "nullable"
+        bigint requested_by FK "app_user"
+        bigint key_expiry_type_id FK
+        timestamp issued_at
+        timestamp expires_at "null unless key_expiry_type=timed"
+        timestamp revoked_at
+        text notes
+    }
+
+    device_ref ||--o{ support_session : "has (RESTRICT)"
+    device_ref ||--o{ auth_key_event : "has"
+    contacts_ref ||--o{ support_session : "requests"
+    technician_ref ||--o{ support_session : "conducts"
+    technician_ref ||--o{ auth_key_event : "issues"
+    app_user_ref ||--o{ auth_key_event : "requested_by"
+    session_status ||--o{ support_session : "classifies"
+    session_outcome ||--o{ support_session : "classifies"
+    key_expiry_type ||--o{ auth_key_event : "classifies"

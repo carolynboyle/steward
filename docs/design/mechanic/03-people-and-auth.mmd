@@ -1,0 +1,52 @@
+erDiagram
+
+    %% ─── PEOPLE AND AUTH ─────────────────────────────────────────────────────
+    %% Cross-references:
+    %% contacts       → see 01-public-schema.mmd
+    %% support_session → see 04-sessions-and-keys.mmd
+    %% auth_key_event  → see 04-sessions-and-keys.mmd
+    %% audit_log       → see 05-audit-and-notifications.mmd
+    %% notification    → see 05-audit-and-notifications.mmd
+
+    contacts_ref {
+        bigint id PK
+        string "see 01-public-schema"
+    }
+
+    app_role {
+        bigint id PK
+        varchar name "admin, technician, customer"
+        integer sort_order
+    }
+
+    app_user {
+        bigint id PK
+        bigint contact_id FK "NOT NULL"
+        bigint role_id FK "NOT NULL"
+        bigint created_by FK "self-ref NOT NULL"
+        varchar username
+        varchar password_hash
+        varchar totp_secret
+        boolean totp_enabled
+        timestamp totp_verified_at
+        boolean is_active
+        timestamp last_login
+        timestamp locked_at
+        integer failed_attempts
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    technician {
+        bigint id PK
+        bigint app_user_id FK "NOT NULL"
+        varchar handle
+        varchar gpg_key_fingerprint
+        boolean active
+        timestamp created_at
+    }
+
+    contacts_ref ||--o| app_user : "is"
+    app_role ||--o{ app_user : "grants"
+    app_user ||--o{ app_user : "created_by"
+    app_user ||--o| technician : "is"
