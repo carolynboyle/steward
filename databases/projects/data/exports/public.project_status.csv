@@ -1,0 +1,9 @@
+"id","name","sort_order"
+1,"active",1
+2,"paused",2
+3,"completed",3
+4,"abandoned",4
+5,"Published",10
+6,"Ready to Write",20
+7,"In Progress",30
+8,"Queued",40

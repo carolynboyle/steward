@@ -1,0 +1,104 @@
+"id","project_id","parent_id","description","status_id","priority_id","links","source_file","sort_order","created_at","updated_at","completed_at","notes"
+8,8,NULL,"Add contacts management",2,2,"","",0,"2026-04-14 06:42:43.399942","2026-04-14 06:42:43.399942",NULL,NULL
+10,8,NULL,"Add sticky navbar",1,1,"","",0,"2026-04-14 06:44:26.305409","2026-04-14 06:44:26.305409",NULL,NULL
+18,8,NULL,"Contacts feature — repository, routes, templates.",1,2,"","",7,"2026-04-14 20:26:56.784934","2026-04-14 20:26:56.784934",NULL,NULL
+19,8,NULL,"Superuser SQL box — authenticated route, raw SQL input, result table for SELECT, confirm step for writes, session query history.",1,2,"","",8,"2026-04-14 20:26:56.784934","2026-04-14 20:26:56.784934",NULL,NULL
+20,8,NULL,"Basic auth — session cookies, login route, users table linked to contacts, two roles: standard and superuser.",1,2,"","",9,"2026-04-14 20:26:56.784934","2026-04-14 20:26:56.784934",NULL,NULL
+21,8,NULL,"Write tests — test_db_projects.py, test_db_tasks.py, test_routes_projects.py.",1,2,"","",10,"2026-04-14 20:26:56.784934","2026-04-14 20:26:56.784934",NULL,NULL
+22,8,NULL,"Deploy to wcyjvs2.",1,2,"","",11,"2026-04-14 20:26:56.784934","2026-04-14 20:26:56.784934",NULL,NULL
+11,8,NULL,"Fix ""add parent""",4,4,"","",0,"2026-04-14 06:45:49.652087","2026-04-14 21:58:28.087539","2026-04-14 21:58:28.102218",NULL
+24,9,NULL,"create a customized MX linux live usb for refurbishing computers",1,2,"","",0,"2026-04-14 23:39:53.539835","2026-04-14 23:39:53.539835",NULL,NULL
+25,9,NULL,"identify necessary fonts that should be installed so that things like brower emojis are rendered properly.",1,2,"","",0,"2026-04-14 23:42:02.004119","2026-04-14 23:42:02.004119",NULL,NULL
+27,8,NULL,"ui theme options: enable viewing this task list on as the old alternating green/white row stripes from the olden days of paper outputs.",1,1,"","",0,"2026-04-15 00:36:53.702991","2026-04-15 00:36:53.702991",NULL,NULL
+28,8,NULL,"Test the full flow — type a description, set status and priority, hit Save, and confirm it lands back on the board.",4,4,"","",0,"2026-04-15 01:03:31.292592","2026-04-15 01:28:24.017097","2026-04-15 01:28:24.02462",NULL
+29,8,NULL,"fix add task so that after saving a new task it goes back to the board",4,2,"","",0,"2026-04-15 01:30:55.719491","2026-04-15 01:31:42.559649","2026-04-15 01:31:42.569366",NULL
+12,8,NULL,"Fix inverted task hierarchy UX — subtasks should be added from the parent task, not the other way around.",4,4,"","",0,"2026-04-14 20:26:56.784934","2026-04-15 01:36:58.491957","2026-04-15 01:36:58.499047",NULL
+30,8,NULL,"make index.html show cards for every database the Curator interacts with",1,1,"","",0,"2026-04-15 01:40:16.340205","2026-04-15 01:40:16.340205",NULL,NULL
+31,3,NULL,"UCSD Help Desk Support Analyst
+https://www.indeed.com/viewjob?jk=34bd7e89ec38cab6&tk=1jm6h234incsh801&from=jobi2a_jobmatch-reactivation-en-US_email&rjptk=1jm6h22a0mt27805&xpse=SoC267I3kHUoCS2FVJ0LbzkdCdPP&xfps=550d9f13-cd70-4496-992c-a65aa3149b6f&xkcb=SoC167M3kGqHErWuRx0ObzkdCdPP",1,2,"","",0,"2026-04-15 02:09:21.239784","2026-04-15 02:09:21.239784",NULL,NULL
+32,3,NULL,"Technical Writer, SDCCD
+https://www.sdccdjobs.com/postings/16756",1,3,"","",0,"2026-04-15 02:20:05.434055","2026-04-15 02:20:05.434055",NULL,NULL
+15,8,NULL,"Replace task status dropdown symbols with double-click dialog showing word labels.",4,2,"","",0,"2026-04-14 20:26:56.784934","2026-04-15 02:28:18.681453","2026-04-15 02:28:18.687261",NULL
+14,8,NULL,"Add collapsible tree to board left panel.",4,2,"","",0,"2026-04-14 20:26:56.784934","2026-04-15 02:28:28.368535","2026-04-15 02:28:28.374862",NULL
+17,8,NULL,"Task status change in board panel should stay in panel via HTMX, not redirect to detail page.",4,2,"","",0,"2026-04-14 20:26:56.784934","2026-04-15 02:29:29.251238","2026-04-15 02:29:29.257515",NULL
+13,8,NULL,"Fix parent_id data issue — existing subprojects have wrong parent_id causing incorrect tree display in board view.",4,3,"","",0,"2026-04-14 20:26:56.784934","2026-04-15 02:29:49.086758","2026-04-15 02:29:49.092398",NULL
+34,8,NULL,"Add new task dialog to board panel — no navigation away, no parent field ",4,2,"","",0,"2026-04-15 02:30:54.73236","2026-04-15 02:30:54.73236",NULL,NULL
+35,8,NULL,"Add Curator character image to empty panel state",1,1,"","",0,"2026-04-15 02:31:45.666829","2026-04-15 02:31:45.666829",NULL,NULL
+23,8,NULL,"Write README.",3,1,"","",0,"2026-04-14 20:26:56.784934","2026-04-15 02:34:33.312803",NULL,NULL
+39,2,NULL,"Audit devices for lan inventory databases",3,1,"","",0,"2026-04-15 02:40:51.338405","2026-04-15 02:40:51.338405",NULL,NULL
+38,2,NULL,"Create a PostgreSQL database for lan information and interaction with ansible",3,2,"","",0,"2026-04-15 02:40:07.149754","2026-04-15 02:41:06.518526",NULL,NULL
+33,8,NULL,"Add a task search bar at the top of the tasks detail page",4,2,"","",0,"2026-04-15 02:27:15.75587","2026-04-15 03:15:10.33656","2026-04-15 03:15:10.342731",NULL
+16,8,NULL,"Add Board link to nav in base.html.",4,2,"","",0,"2026-04-14 20:26:56.784934","2026-04-15 03:16:41.966674","2026-04-15 03:16:41.974959",NULL
+41,8,NULL,"Align task page buttons",1,1,"","",0,"2026-04-15 03:28:13.793046","2026-04-15 03:28:13.793046",NULL,NULL
+43,8,NULL,"Fix inline project type edit redirect — stay on board after save, verify all other inline edits are the same",1,2,"","",0,"2026-04-16 16:25:00.522071","2026-04-16 16:25:00.522071",NULL,NULL
+44,8,NULL,"Delete the standalone project detail page/route",1,1,"","",0,"2026-04-16 16:25:26.188654","2026-04-16 16:25:26.188654",NULL,NULL
+45,12,NULL,"refactor any python tools that use flat layout to use src layout.",1,2,"","",0,"2026-04-16 20:34:03.865333","2026-04-16 20:34:03.865333",NULL,NULL
+46,8,NULL,"""Add a related items section to project and task detail pages. A dropdown allowing users to link any project or task to any other project or task, with the relationship displayed as a navigable link on both detail pages.""",1,1,"","",0,"2026-04-16 20:41:45.615121","2026-04-16 20:41:45.615121",NULL,NULL
+47,8,NULL,"come up with a way to save repos in a list so they don't have to be typed from scatch every time. A filterable search page like the project tasks details page maybe or a combo dropdown bos if that's still a thing.",1,1,"","",0,"2026-04-16 20:50:05.682627","2026-04-16 20:50:05.682627",NULL,NULL
+51,14,NULL,"modify fletcher to detect local git first.",4,2,"","",0,"2026-04-17 04:13:17.245829","2026-04-17 04:51:57.632369","2026-04-17 04:51:57.646264",NULL
+49,14,NULL,"refactor: have fletcher manifest.yml file date to compare to run date, prompt for ok if different
+",1,2,"","",0,"2026-04-17 03:49:46.920373","2026-04-17 03:49:46.920373",NULL,NULL
+50,8,NULL,"Add ability to add sub-projects to a project record instead of having to create a new project and set a parent id",1,2,"","",0,"2026-04-17 04:06:29.50634","2026-04-17 04:06:29.50634",NULL,NULL
+48,14,NULL,"fix confusion related if fletcher ever gets a version.py added to it",1,1,"per:https://claude.ai/chat/16bf8064-5f8e-44fc-992f-ea2732fcd1e0","",0,"2026-04-17 03:44:08.511069","2026-04-17 04:50:33.925486",NULL,NULL
+36,8,NULL,"Keep board panel open and refreshed after task status change via HTMX | open | normal",4,1,"","",0,"2026-04-15 02:32:22.37792","2026-04-17 04:54:32.089104","2026-04-17 04:54:32.104729",NULL
+9,8,NULL,"modify projects and tasks to use list boxes",4,1,"","",0,"2026-04-14 06:43:42.450723","2026-04-24 17:06:36.548813","2026-04-24 17:06:36.554066",""
+52,14,NULL,"add --manifest cli parameter so that fletcher can run from the folder where toml is located and still find manifest.yml in the dev-utils project root.",2,4,"https://claude.ai/chat/b833b5f8-29fe-47a2-80ff-70284b6b9e6d","",0,"2026-04-17 04:47:16.327363","2026-04-17 04:51:27.080818",NULL,NULL
+53,8,NULL,"redo the search bar to fit the page better",1,1,"","",0,"2026-04-17 04:53:08.504011","2026-04-17 04:53:08.504011",NULL,NULL
+54,8,NULL,"add space to the right of the pencil icon for task editing ",1,2,"","",0,"2026-04-17 04:53:46.881805","2026-04-17 04:53:46.881805",NULL,NULL
+55,8,NULL,"add left and right borders to project detail page",1,2,"","",0,"2026-04-17 13:47:38.79413","2026-04-17 13:47:38.79413",NULL,NULL
+56,8,NULL,"align buttons on detail page.",1,2,"","",0,"2026-04-17 13:48:05.18552","2026-04-17 13:48:05.18552",NULL,NULL
+84,8,NULL,"Verify all hard-coded script values that can be moved to external configs have been moved",1,1,"","",0,"2026-04-21 21:21:03.253357","2026-04-21 21:21:03.253357",NULL,NULL
+58,8,NULL,"Add the links text box to the inline editing detail page for adding a new task",1,1,"https://claude.ai/chat/25cdaeac-c40d-4a90-a69d-9fb6aedfc838","",0,"2026-04-17 14:20:44.17362","2026-04-17 14:20:44.17362",NULL,NULL
+57,8,NULL,"Add tabbed panel view with Snippets — tabs for Tasks, Subprojects, and Snippets; Snippets are project-scoped searchable reference entries (title, body, category)",1,1,"https://claude.ai/chat/25cdaeac-c40d-4a90-a69d-9fb6aedfc838","",0,"2026-04-17 14:18:34.107614","2026-04-17 14:29:29.761007",NULL,NULL
+59,1,NULL,"Reporting",1,1,"","",0,"2026-04-17 14:31:29.384333","2026-04-17 14:31:29.384333",NULL,NULL
+62,14,NULL,"creat a simple lookup like fletcher manifest-url dbkit that reads the local manifest and returns the raw URL.",1,2,"","",0,"2026-04-17 15:50:20.594755","2026-04-17 15:50:20.594755",NULL,NULL
+63,15,NULL,"change repro branch first guess from ""master"" to ""main""",1,2,"","",0,"2026-04-17 15:54:50.902911","2026-04-17 15:54:50.902911",NULL,NULL
+64,15,NULL,"Filter out egginfo* from the list of directories.",1,2,"","",0,"2026-04-17 15:59:33.819869","2026-04-17 15:59:33.819869",NULL,NULL
+61,15,NULL,"add packaging to pyproject.toml for setupkit",4,4,"","",0,"2026-04-17 15:31:00.867342","2026-04-17 16:09:22.772249","2026-04-17 16:09:22.779216",NULL
+66,15,NULL,"add default directory option to detected that shows as <suggested in the list",1,2,"","",0,"2026-04-17 16:10:22.042906","2026-04-17 16:10:22.042906",NULL,NULL
+69,8,NULL,"Between the word PROJECTS and the + sign at the top of the projects list, include a dropdown to filter for project type",1,2,"","",0,"2026-04-17 23:55:15.585916","2026-04-17 23:55:15.585916",NULL,NULL
+71,8,NULL,"create a query to filter task status based on project type",1,1,"https://claude.ai/chat/cbcfe055-99a3-444e-9801-5285343cfe2a","",0,"2026-04-18 15:34:11.491619","2026-04-18 15:34:11.491619",NULL,NULL
+72,8,NULL,"Projects searching",1,2,"","",0,"2026-04-18 15:49:17.680181","2026-04-18 15:49:17.680181",NULL,NULL
+73,12,NULL,"bugfix: repo branch detection",2,4,"https://claude.ai/chat/5dae1f0d-a496-499a-8106-4595e9896374","",0,"2026-04-18 18:33:57.504865","2026-04-18 18:33:57.504865",NULL,NULL
+74,1,NULL,"New member of the project crew: The Quartermaster",1,2,"","",0,"2026-04-19 18:23:39.236346","2026-04-19 18:23:39.236346",NULL,NULL
+70,8,NULL,"Externalize sql that is currently in projects.py to comply with project_rules.md",4,4,"","",0,"2026-04-18 00:42:03.300443","2026-04-20 04:07:46.832778","2026-04-20 04:07:46.846025",NULL
+79,8,NULL,"Add a ""full edit"" button to the add task dialog",1,1,"","",0,"2026-04-21 18:36:00.568298","2026-04-21 18:36:00.568298",NULL,NULL
+80,8,NULL,"save notes and urls from add task popup",1,3,"","",0,"2026-04-21 18:36:48.049234","2026-04-21 18:37:10.815089",NULL,NULL
+91,15,NULL,"changedoc for venv path and logger",4,2,"","",0,"2026-04-24 16:44:42.747119","2026-04-24 16:44:42.747119",NULL,"etupkit_venv_path_and_bootstrap.md in setupkit/docs/changedocs
+"
+85,8,NULL,"assure all functions have docstrings and fix anything else the linter complains about ",1,2,"","",0,"2026-04-21 21:22:11.795146","2026-04-21 21:22:11.795146",NULL,NULL
+92,8,NULL,"Add a link to parent project if it exists.",1,1,"","",0,"2026-04-24 16:46:40.560955","2026-04-24 16:46:40.560955",NULL,"same as parent project shows sub project links in board detail.
+"
+88,8,NULL,"Add status message to project add form so that records don't get duplicated on save,",1,2,"","",0,"2026-04-22 01:36:03.032082","2026-04-22 01:36:03.032082",NULL,"Also, consider ways to prevent duplication of records in general, unless they're supposed to be duplicated."
+93,15,NULL,"setupkit_logger_and_setup_sh.md changedoc",4,2,"","",0,"2026-04-24 16:47:54.441882","2026-04-24 16:47:54.441882",NULL,"setupkit_logger_and_setup_sh.md"
+90,8,NULL,"decided whether project tree should show project trees fully or if only one level display is sufficient.",1,1,"","",0,"2026-04-24 16:22:04.607918","2026-04-24 16:22:04.607918",NULL,"right now a sub-project of a sub-project displays as if the project is a direct sub of the top level project. changing that to reflect the actual hierarch would likely be a mess."
+94,8,NULL,"Remove hardcoded variables from all code. Task status appears to be hard-coded since there are other status values in the task status table that do not appear in this task add dialog.",1,1,"","",0,"2026-04-24 16:49:39.393503","2026-04-24 16:49:39.393503",NULL,""
+95,15,NULL,"Add venv_path to setupkit.yaml",2,4,"","",0,"2026-04-24 16:50:56.952413","2026-04-24 16:50:56.952413",NULL,"Apply changes from setupkit_venv_path_and_bootstrap.md"
+96,15,NULL,"Add venv_path property to config.py",1,2,"","",0,"2026-04-24 16:51:31.114003","2026-04-24 16:51:31.114003",NULL,"Apply changes from setupkit_venv_path_and_bootstrap.md"
+97,8,NULL,"decide if tasks should have files link",1,1,"","",0,"2026-04-24 16:52:31.365093","2026-04-24 16:52:31.365093",NULL,"do this after original us is solid, I'm leaning toward do this."
+98,15,NULL,"create logger.py",1,2,"","",0,"2026-04-24 16:53:18.210739","2026-04-24 16:53:18.210739",NULL,"Apply changes from setupkit_venv_path_and_bootstrap.md"
+99,15,NULL,"remove _setup_logging() from installer.py6",1,2,"","",0,"2026-04-24 16:54:10.467498","2026-04-24 16:54:10.467498",NULL,""
+100,15,NULL,"remove LOG_PATH from installer.py",1,2,"","",0,"2026-04-24 16:55:19.692868","2026-04-24 16:55:19.692868",NULL,"setupkit_logger_and_setup_sh.md"
+101,15,NULL,"update main() in installer.py",1,2,"","",0,"2026-04-24 16:55:40.601317","2026-04-24 16:55:40.601317",NULL,"setupkit_logger_and_setup_sh.md"
+102,8,NULL,"Enable opening local file links from  curator.",1,1,"","",0,"2026-04-24 16:59:13.28808","2026-04-24 16:59:13.28808",NULL,"Currently opens url links fine but local file links try to find the file on localhost and return: ""{""detail"":""Not Found""}"" error"
+103,14,NULL,"create the ability to only generate raw urls for a subset, like ""everything in the docs folder [repo root]/docs/*",1,1,"","",0,"2026-04-24 17:00:34.240839","2026-04-24 17:00:34.240839",NULL,""
+65,14,NULL,"bugfix: manifest.fletch shows branch master when it is really main",4,2,"","",0,"2026-04-17 16:07:30.846375","2026-04-24 17:04:24.682703","2026-04-24 17:04:24.688536",""
+67,8,NULL,"walk thru all board edit re-directs to identify any issues.",4,4,"","",0,"2026-04-17 16:26:22.574573","2026-04-24 17:06:22.967917","2026-04-24 17:06:22.973479",""
+104,14,NULL,"fits ignore patterns so that they apply to every level of the repo hierarchy.",1,2,"","",0,"2026-04-24 17:01:39.037874","2026-04-24 17:01:39.037874",NULL,"It must not be doing this right now because  egginfo should never make it into the manifest"
+105,15,NULL,"create setup.sh at dev-utils repo root",1,2,"","",0,"2026-04-24 17:03:13.130584","2026-04-24 17:03:13.130584",NULL,""
+106,8,NULL,"Add delete task button to task full edit form. ",1,2,"","",0,"2026-04-24 17:05:46.614153","2026-04-24 17:05:46.614153",NULL,"visibility to be user role-based"
+107,63,NULL,"this is a test task to see if task notes get saved",1,2,"","",0,"2026-04-25 19:16:07.305221","2026-04-25 19:16:07.305221",NULL,"test task not"
+108,15,NULL,"Eventually change setpkit readme to skip reference to opt venv installtion",1,1,"","",0,"2026-04-26 17:37:57.222615","2026-04-26 17:37:57.222615",NULL,"this a network path I use so that any user on the machine can use what's installed there, but that's a personal preference that doesn't belong in the readme"
+109,12,NULL,"Update the README.md in the repo root",4,2,"https://github.com/carolynboyle/dev-utils/blob/main/README.md","",0,"2026-04-26 17:40:54.779986","2026-04-26 17:40:54.779986",NULL,"done and in local repo, not yet committed."
+60,12,NULL,"create a tool to automate creation of a network venv for installing python packages accessible to all users.",1,1,"https://claude.ai/chat/9c4c5974-a2cd-4ae6-b2e4-6ae7b20bbcac, https://claude.ai/chat/fafed263-0e83-407c-83bb-443f28a141df","",0,"2026-04-17 14:43:52.770544","2026-04-26 17:46:17.415233",NULL,""
+110,8,NULL,"fix links in tasks",1,1,"","",0,"2026-04-26 17:51:06.138036","2026-04-26 17:51:06.138036",NULL,"saved links to claude.ai conversations, copied from adminer, and pasted into chromium got an error message"
+111,12,NULL,"fix task edit updating",1,2,"","",0,"2026-04-26 17:52:58.713974","2026-04-26 17:52:58.713974",NULL,"added links to a task, save shows they're in adminer but they don't show in curator until the whole thing is restarted."
+112,69,NULL,"Install ansible
+",1,2,"","",0,"2026-05-06 19:03:54.340915","2026-05-06 19:03:54.340915",NULL,""
+113,70,NULL,"firewall setup ",1,3,"","",0,"2026-05-06 19:58:50.654226","2026-05-06 19:58:50.654226",NULL,""
+115,70,NULL,"Headscale coordination server",1,3,"","",0,"2026-05-06 19:59:41.202105","2026-05-06 20:17:34.898614",NULL,"curl -s https://api.github.com/repos/juanfont/headscale/releases/latest | grep ""browser_download_url.*linux_amd64.rpm"" | cut -d '""' -f 4"
+117,70,NULL,"certbot for headscale
+",1,3,"","",0,"2026-05-06 21:11:52.866975","2026-05-06 21:11:52.866975",NULL,""
+114,70,NULL,"fail2ban",4,3,"","",0,"2026-05-06 19:59:05.636045","2026-05-06 21:12:01.39467","2026-05-06 21:12:01.402037",""
+116,71,NULL,"install headscale",4,3,"","",0,"2026-05-06 20:19:45.276002","2026-05-07 19:22:45.645266","2026-05-07 19:22:45.675509",""
+118,71,NULL,"Document everything it took to setup the lan on the new VPS and get everything working again",1,2,"","",0,"2026-05-07 19:23:52.097081","2026-05-07 19:23:52.097081",NULL,"new mesh broke everything, that is bad"

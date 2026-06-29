@@ -1,0 +1,5 @@
+"id","name","display","sort_order","is_terminal"
+1,"open","[ ]",1,False
+2,"in progress","[~]",2,False
+3,"on hold","[!]",3,False
+4,"complete","[x]",4,True
