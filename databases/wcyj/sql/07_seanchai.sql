@@ -92,8 +92,8 @@ CREATE TABLE seanchai.searches (
     id           BIGINT      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     search_id    VARCHAR(20) NOT NULL UNIQUE,   -- SRCH-001, etc.
     search_terms TEXT        NOT NULL,
-    county_scope VARCHAR(100),
-    year_filter  VARCHAR(50),                   -- flexible: 1820-1860, pre-1850
+    county_scope TEXT,
+    year_filter  TEXT,                          -- flexible: 1820-1860, pre-1850
     result_count INTEGER,
     status       VARCHAR(50) NOT NULL DEFAULT 'complete',
     notes        TEXT,
