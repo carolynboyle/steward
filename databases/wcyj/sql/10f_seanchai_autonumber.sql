@@ -16,6 +16,13 @@
 -- An explicit record_id / search_id in the payload is still honoured —
 -- useful for scripted imports. The Curator form never sends one on insert.
 --
+-- Also in this file:
+--   - api.get_record_detail / api.get_search_detail now include the
+--     internal id in their JSON (see note below) — without it, inserts
+--     from the detail panel fail in call_proc_and_refetch.
+--   - A new record with no status defaults to 'active' instead of
+--     failing the NOT NULL constraint.
+--
 -- Updates are unchanged: the visible ID is never renumbered, even if a
 -- record's type changes, because notes and links throughout the ledger
 -- refer to records by that text.
@@ -26,6 +33,40 @@
 -- Depends on: 07b_seanchai_fix.sql (api.get_record_detail,
 --             api.get_search_detail)
 -- =============================================================================
+
+
+-- -----------------------------------------------------------------------------
+-- Read functions — add the internal id to the returned JSON
+--
+-- 07b removed id from the seanchai detail views (correct: they define the
+-- form's fields, and id is not a form field). But the read functions are
+-- also the panel's and the save routes' source of the record, and both
+-- need id: call_proc_and_refetch reads data.id after an insert, and
+-- detail-panel.js / the grids set their row id from the saved record.
+-- Projects/tasks/contacts already return id; this brings seanchaí in line.
+-- The views are unchanged, so id still never appears as a form field.
+-- -----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION api.get_record_detail(p_id BIGINT)
+RETURNS JSONB
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+    SELECT to_jsonb(v) || jsonb_build_object('id', r.id)
+    FROM seanchai.v_record_detail v
+    JOIN seanchai.records r USING (record_id)
+    WHERE r.id = p_id;
+$$;
+
+CREATE OR REPLACE FUNCTION api.get_search_detail(p_id BIGINT)
+RETURNS JSONB
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+    SELECT to_jsonb(v) || jsonb_build_object('id', s.id)
+    FROM seanchai.v_search_detail v
+    JOIN seanchai.searches s USING (search_id)
+    WHERE s.id = p_id;
+$$;
 
 
 -- -----------------------------------------------------------------------------
@@ -88,7 +129,10 @@ BEGIN
         ) VALUES (
             v_record_id,
             (payload->>'record_type_id')::BIGINT,
-            (payload->>'record_status_id')::BIGINT,
+            COALESCE(
+                (payload->>'record_status_id')::BIGINT,
+                (SELECT id FROM seanchai.record_status WHERE name = 'active')
+            ),
             COALESCE((payload->>'display_order')::INTEGER, 0),
             payload->>'year',
             payload->>'subject',
