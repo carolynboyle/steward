@@ -9,6 +9,7 @@ CREATE OR REPLACE FUNCTION api.get_field_schema(p_view_name TEXT)
 RETURNS JSONB
 LANGUAGE sql
 STABLE
+SECURITY DEFINER
 AS $$
     SELECT jsonb_agg(
         jsonb_build_object(
