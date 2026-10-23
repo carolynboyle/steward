@@ -16,6 +16,7 @@ databases/
 docs/
   design/           ER diagrams (Mermaid)
   change/           Migration notes
+  roadmap/          Open to-do notes (e.g. TODO_STEWARD_TIDY_UP.md)
 data/schemas/       Additional ER diagrams
 templates/          config.yaml.template for the projects init tooling
 archive/            Old schemas and backups
