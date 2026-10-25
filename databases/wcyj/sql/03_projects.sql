@@ -229,10 +229,6 @@ GRANT SELECT, INSERT, UPDATE ON
     projects.project_contacts
 TO steward;
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON
-    projects.project_links
-TO web_app_user;
-
 GRANT SELECT, INSERT, UPDATE ON
     projects.project_links
 TO steward;
