@@ -83,6 +83,27 @@ scratch*). Renaming files has no effect on any existing database.
 - [ ] **`docs/change/migration_v_project_tree_add_type (1).md`** — rename
       to drop the `(1)` download suffix.
 
+## Install script (curator)
+
+The curator install script (`db/install.sh`) is currently one-shot only — it
+fetches SQL files from steward into `db/init/` on a fresh server and exits.
+
+- [ ] **Make the install script re-runnable for `db/init/` updates.** When
+      steward gains new SQL files (e.g. a new `06f_` file) and a server that
+      ran the original install needs to pick them up without a full rebuild:
+  - Compare the fetched manifest against what's already in `db/init/` (checksum
+    or last-modified header from GitHub raw URLs).
+  - Fetch only added or changed files; leave unchanged ones alone.
+  - Do NOT automatically run `docker compose down`/`up` — the operator decides
+    when to apply the new init files. The script's job is to keep `db/init/`
+    current; the README explains how to re-init an existing database from the
+    updated files (typically: stop containers, drop the volume, restart).
+  - A `--force` flag should bypass the diff and re-fetch everything for a clean
+    reset of `db/init/`.
+  - The script's own version or last-fetched date can be written to
+    `db/init/.manifest` alongside the SQL files (already gitignored) so a
+    re-run can report what was added/changed without fetching blindly.
+
 ## Branches
 
 - [ ] **Delete `recovered-core-sql`** on GitHub — fully merged into
