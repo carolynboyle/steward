@@ -13,6 +13,23 @@ area; tick items off (or delete them) as they're done.
       SSH so `git pull` keeps working (the server's SSH key already
       authenticates to GitHub):
       `git remote set-url origin git@github.com:carolynboyle/steward.git`
+
+  **Install script impact:** The curator install script fetches SQL files
+  directly from steward via `curl` + raw GitHub URLs. If steward is private,
+  one of two approaches is needed:
+
+  - **GitHub PAT in `install.conf`** — add `GITHUB_TOKEN=ghp_...` to the
+    config; pass it as `Authorization: token $GITHUB_TOKEN` on every `curl`
+    call. The config is deleted on successful install, taking the token with
+    it. Generate a fine-grained PAT scoped to `contents:read` on steward only;
+    set a 90-day expiry and rotate on each install.
+  - **`gh` CLI** — use `gh api repos/carolynboyle/steward/contents/...` instead
+    of `curl`. Auth lives in `gh`'s keystore (set once with `gh auth login`),
+    so no credential ever touches `install.conf`. Requires `gh` to be installed
+    on the target server.
+
+  The PAT approach is self-contained; the `gh` approach has cleaner credential
+  hygiene if `gh` is already part of the server toolchain.
 - [ ] **Business data committed to the repo.** Decide whether these belong
       in steward at all, or in private storage / a backup location:
   - `archive/curator_backup_20260621.sql` — full pg_dump of the old
