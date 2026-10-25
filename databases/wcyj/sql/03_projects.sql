@@ -188,6 +188,36 @@ WHERE cr.name = 'envoy';
 
 
 -- =============================================================================
+-- projects.project_links
+-- External links attached to a project (URLs, reference notes, etc.).
+-- label is required; url is optional — a label-only entry is a valid
+-- placeholder note ("Find this thing") before a URL is known.
+-- =============================================================================
+
+CREATE TABLE projects.project_links (
+    id           BIGINT      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id   BIGINT      NOT NULL REFERENCES projects.projects (id) ON DELETE CASCADE,
+    label        TEXT        NOT NULL,
+    url          TEXT,
+    sort_order   INT         NOT NULL DEFAULT 0,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by   BIGINT      REFERENCES identity.app_user (id) ON DELETE SET NULL,
+    updated_by   BIGINT      REFERENCES identity.app_user (id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_project_links_project ON projects.project_links (project_id);
+
+CREATE TRIGGER trg_project_links_updated_at
+    BEFORE UPDATE ON projects.project_links
+    FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+CREATE TRIGGER trg_project_links_audit
+    AFTER INSERT OR UPDATE OR DELETE ON projects.project_links
+    FOR EACH ROW EXECUTE FUNCTION audit.log_change();
+
+
+-- =============================================================================
 -- GRANTs
 -- =============================================================================
 
@@ -197,6 +227,14 @@ GRANT SELECT, INSERT, UPDATE ON
     projects.projects,
     projects.tasks,
     projects.project_contacts
+TO steward;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON
+    projects.project_links
+TO web_app_user;
+
+GRANT SELECT, INSERT, UPDATE ON
+    projects.project_links
 TO steward;
 
 GRANT SELECT ON
