@@ -94,3 +94,6 @@ __jinja2_cache__/
 
 # misc notes
 scratchpad.md
+
+# Claude Code — prevents credentials in approved commands from being committed
+.claude/*.local.json
